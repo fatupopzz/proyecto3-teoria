@@ -252,7 +252,8 @@ function renderEntradas() {
       class: "entrada" + (r.propia ? " propia-res" : ""), role: "tab",
       "aria-selected": String(i === S.sel),
       onclick: () => seleccionar(i),
-    }, marca, h("span", { class: "w" }, r.entrada || "ε"), h("span", { class: "info" }, info)));
+    }, marca, h("span", { class: "w", "data-sujeto": "sujeto " + String(i + 1).padStart(2, "0") }, r.entrada || "ε"),
+       h("span", { class: "info" }, info)));
   });
 }
 
@@ -335,8 +336,8 @@ function renderDelta() {
 // ---------- diagrama de estados ----------------------------------------
 
 const R = 25;          // radio de los nodos
-const COL = 140;       // separacion entre capas
-const FIL = 118;       // separacion dentro de una capa
+const COL = 170;       // separacion entre capas
+const FIL = 150;       // separacion dentro de una capa
 
 function firma(m) {
   return "mt.pos." + (m.nombre || "") + "|" + m.estados.join(",");
@@ -409,12 +410,18 @@ function etiquetaRegla(t, m) {
   return partes;
 }
 
+// encuadra sobre lo que realmente se dibujo (lazos y etiquetas incluidos)
 function encuadrar() {
-  const xs = Object.values(S.pos).map((p) => p.x);
-  const ys = Object.values(S.pos).map((p) => p.y);
-  const x0 = Math.min(...xs) - 110, x1 = Math.max(...xs) + 100;
-  const y0 = Math.min(...ys) - 120, y1 = Math.max(...ys) + 120;
-  ponerVista({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+  let caja = null;
+  try { caja = S.capaAristas && E.grafo.querySelector(".lienzo").getBBox(); } catch (_) {}
+  if (!caja || !caja.width) {
+    const xs = Object.values(S.pos).map((p) => p.x);
+    const ys = Object.values(S.pos).map((p) => p.y);
+    caja = { x: Math.min(...xs) - 90, y: Math.min(...ys) - 110,
+             width: Math.max(...xs) - Math.min(...xs) + 180, height: Math.max(...ys) - Math.min(...ys) + 220 };
+  }
+  const m = 22;
+  ponerVista({ x: caja.x - m, y: caja.y - m, w: caja.width + 2 * m, h: caja.height + 2 * m });
 }
 
 function ponerVista(v) {
@@ -466,9 +473,12 @@ function dibujarGrafo() {
   }
   E.grafo.append(defs);
 
+  const lienzo = s("g", { class: "lienzo" });
   S.capaAristas = s("g", { class: "aristas" });
   S.capaNodos = s("g", { class: "nodos" });
-  E.grafo.append(S.capaAristas, S.capaNodos);
+  S.capaEtiquetas = s("g", { class: "etiquetas" });
+  lienzo.append(S.capaAristas, S.capaNodos, S.capaEtiquetas);
+  E.grafo.append(lienzo);
 
   S.nodos = {};
   for (const q of m.estados) {
@@ -486,6 +496,7 @@ function dibujarGrafo() {
   }
   colocarNodos();
   dibujarAristas();
+  encuadrar();
 }
 
 function colocarNodos() {
@@ -497,8 +508,11 @@ function colocarNodos() {
 function dibujarAristas() {
   const m = S.maquina;
   S.capaAristas.replaceChildren();
+  S.capaEtiquetas.replaceChildren();
   S.aristas = {};
+  S.etiquetaDe = {};
   S.lineaRegla = {};
+  const etiquetas = [];
 
   // inicio
   const p0 = S.pos[m.inicial];
@@ -551,7 +565,8 @@ function dibujarAristas() {
       ancla = { x: cima.x + sx * 9, y: cima.y + sy * 9 };
     }
 
-    g.append(s("path", { d, "marker-end": "url(#punta)", filter: "url(#tinta)" }));
+    // sin filtro de tinta: deformaba las puntas de flecha
+    g.append(s("path", { d, "marker-end": "url(#punta)" }));
 
     const MAX = 5;
     const visibles = reglas.length > MAX ? reglas.slice(0, MAX - 1) : reglas;
@@ -574,11 +589,36 @@ function dibujarAristas() {
       mas.textContent = `+${reglas.length - visibles.length} más`;
       tx.append(mas);
     }
-    g.append(tx);
+    // las etiquetas van en su propia capa, encima de nodos y lineas
+    const et = s("g", { class: "etiqueta" });
+    et.append(tx);
+    S.capaEtiquetas.append(et);
+    etiquetas.push({ el: et, lado, lazo: de === a });
     S.capaAristas.append(g);
-    for (const k of reglas) S.aristas[k] = g;
+    for (const k of reglas) { S.aristas[k] = g; S.etiquetaDe[k] = et; }
   }
+  despejarEtiquetas(etiquetas);
   resaltarGrafo();
+}
+
+/* Empuja cada etiqueta hacia su lado (arriba o abajo de la arista) hasta que
+   no tape un estado ni otra etiqueta ya colocada. Primero los lazos, que no
+   tienen a donde mas moverse. */
+function despejarEtiquetas(etiquetas) {
+  const choca = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  const ocupado = Object.values(S.pos).map((p) => ({ x: p.x - R - 3, y: p.y - R - 3, w: 2 * R + 6, h: 2 * R + 6 }));
+  const orden = [...etiquetas].sort((a, b) => b.lazo - a.lazo);
+  for (const et of orden) {
+    const b = et.el.getBBox();
+    let dy = 0;
+    for (let i = 0; i < 24; i++) {
+      const caja = { x: b.x - 2, y: b.y + dy - 1, w: b.width + 4, h: b.height + 2 };
+      if (!ocupado.some((o) => choca(o, caja))) break;
+      dy += et.lado * 6;
+    }
+    if (dy) et.el.setAttribute("transform", `translate(0,${dy})`);
+    ocupado.push({ x: b.x - 2, y: b.y + dy - 1, w: b.width + 4, h: b.height + 2 });
+  }
 }
 
 function unidad(x, y) {
@@ -631,12 +671,14 @@ function resaltarGrafo() {
     n.classList.remove("usada");
     n.querySelector("path").setAttribute("marker-end", "url(#punta)");
   });
-  S.capaAristas.querySelectorAll("tspan[style]").forEach((n) => n.removeAttribute("style"));
+  S.capaEtiquetas.querySelectorAll("tspan[style]").forEach((n) => n.removeAttribute("style"));
+  S.capaEtiquetas.querySelectorAll(".usada").forEach((n) => n.classList.remove("usada"));
   if (d && d.regla !== null) {
     const g = S.aristas[d.regla];
     if (g) {
       g.classList.add("usada");
       g.querySelector("path").setAttribute("marker-end", "url(#punta-usada)");
+      S.etiquetaDe[d.regla]?.classList.add("usada");
       const linea = S.lineaRegla[d.regla];
       if (linea) linea.setAttribute("style", "font-weight:700;text-decoration:underline");
     }
@@ -771,7 +813,16 @@ function irA(p) {
 
   if (p === fin) ponerSello(r, previo !== fin);
   else E.sello.hidden = true;
+  marcarHud(r, p);
   S.pasoPintado = p;
+}
+
+// codigo de tiempo de la camara: cada paso de la MT es un cuadro a 24 cps
+function marcarHud(r, p) {
+  const f = p % 24, seg = Math.floor(p / 24);
+  const dos = (n) => String(n).padStart(2, "0");
+  $("#hud-tc").textContent = `${dos(Math.floor(seg / 3600))}:${dos(Math.floor(seg / 60) % 60)}:${dos(seg % 60)}:${dos(f)}`;
+  $("#hud-sujeto").textContent = `sujeto ${String(S.sel + 1).padStart(2, "0")} · w = ${r.entrada || "ε"}`;
 }
 
 function ponerSello(r, golpe) {
@@ -782,7 +833,16 @@ function ponerSello(r, golpe) {
   E.sello.className = "sello " + clase;
   E.sello.replaceChildren(texto, h("small", {}, salida), h("small", {}, r.detalle));
   E.sello.hidden = false;
-  if (golpe) { void E.sello.offsetWidth; E.sello.classList.add("golpe"); }
+  if (golpe) {
+    void E.sello.offsetWidth;
+    E.sello.classList.add("golpe");
+    if (!r.aceptada) {
+      const al = $("#alarma");
+      al.classList.remove("sonando");
+      void al.offsetWidth;
+      al.classList.add("sonando");
+    }
+  }
 }
 
 // ======================================================================
@@ -1010,17 +1070,18 @@ window.addEventListener("resize", () => {
   }, 120);
 });
 
-// tema: papel (claro) o cianotipo (oscuro); sin eleccion se sigue al sistema
+// tema: expediente en papel (claro) o la camara de vision nocturna (oscuro);
+// sin eleccion se sigue al sistema
 function temaActual() {
   const elegido = document.documentElement.dataset.tema;
   if (elegido) return elegido;
-  return matchMedia("(prefers-color-scheme: dark)").matches ? "cianotipo" : "papel";
+  return matchMedia("(prefers-color-scheme: dark)").matches ? "noche" : "papel";
 }
 function pintarBotonTema() {
-  $("#tema").textContent = temaActual() === "papel" ? "◐ cianotipo" : "◑ papel";
+  $("#tema").textContent = temaActual() === "papel" ? "◐ visión nocturna" : "◑ expediente";
 }
 $("#tema").onclick = () => {
-  const nuevo = temaActual() === "papel" ? "cianotipo" : "papel";
+  const nuevo = temaActual() === "papel" ? "noche" : "papel";
   document.documentElement.dataset.tema = nuevo;
   guardar("mt.tema", nuevo);
   pintarBotonTema();

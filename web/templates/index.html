@@ -10,10 +10,17 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
   <link rel="stylesheet" href="static/visor.css">
   <script>
-    try { const t = JSON.parse(localStorage.getItem("mt.tema")); if (t) document.documentElement.dataset.tema = t; } catch (_) {}
+    try { const t = JSON.parse(localStorage.getItem("mt.tema")); if (t) document.documentElement.dataset.tema = t === "papel" ? "papel" : "noche"; } catch (_) {}
   </script>
 </head>
 <body>
+  <div class="alarma" id="alarma" aria-hidden="true"></div>
+  <div class="hud" aria-hidden="true">
+    <span class="esquinas"></span>
+    <span class="rec">REC</span>
+    <span class="tc" id="hud-tc">00:00:00:00</span>
+    <span id="hud-sujeto">sala 3 · cám. 2</span>
+  </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <filter id="tinta" x="-10%" y="-10%" width="120%" height="120%">
       <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="ruido"/>
@@ -27,14 +34,23 @@
     </filter>
   </svg>
 
+  <div class="franja" role="note">
+    <span class="cinta-peligro" aria-hidden="true"></span>
+    <span>PROTOCOLO MT-03</span>
+    <span>·</span>
+    <span>PRUEBA DE COMPUTABILIDAD SOBRE UNA CINTA</span>
+    <span class="parpadeo" aria-hidden="true">● en curso</span>
+    <span class="cinta-peligro" aria-hidden="true"></span>
+  </div>
+
   <header class="cabecera">
     <div class="titulo">
       <h1>Máquina<br>de Turing</h1>
-      <p class="nota">simulador de una cinta<br>teoría de la computación · proyecto 3</p>
+      <p class="nota">simulador de una cinta · expediente <span class="censura" title="clasificado">clasificado</span><br>teoría de la computación · proyecto 3</p>
     </div>
     <nav class="fichas" id="fichas" aria-label="Máquinas"></nav>
     <div class="herramientas">
-      <button type="button" class="tema" id="tema" title="Cambiar entre papel y cianotipo"></button>
+      <button type="button" class="tema" id="tema" title="Cambiar entre expediente y visión nocturna"></button>
       <label class="abrir" title="Abrir un archivo .yaml (también se puede soltar sobre la página)">
         <input type="file" id="archivo" accept=".yaml,.yml">
         <span>abrir .yaml</span>
@@ -49,6 +65,7 @@
       </div>
 
       <div class="fila-entradas">
+        <span class="etq">sujetos de prueba</span>
         <div class="entradas" id="entradas" role="tablist" aria-label="Cadenas"></div>
         <form class="propia" id="propia">
           <input id="cadena" placeholder="otra cadena…" autocomplete="off" aria-label="Cadena a simular">

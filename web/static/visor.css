@@ -1,6 +1,6 @@
-/* Visor de la MT. Idea: un banco de pruebas de laboratorio de los 40:
-   papel cuadriculado, cinta perforada, tinta, impresion de teletipo y sellos.
-   En modo oscuro el papel se vuelve un cianotipo (plano azul de ingenieria). */
+/* Visor de la MT. Idea: el expediente de un protocolo de pruebas de la
+   Guerra Fria: papel cuadriculado, cinta perforada, teletipo, sellos y tachones.
+   En modo oscuro se ve por la camara de vision nocturna de la sala de pruebas. */
 
 :root {
   /* superficies */
@@ -36,6 +36,9 @@
   --rojo-inv: #ff9a8a;
   --tenue-inv: #b8ae9a;
   --mezcla-sello: multiply;
+  --brillo: none;
+  --capa-cctv: 0;
+  --hud: none;
 
   /* escala tipografica */
   --t-xs: 13px;
@@ -55,33 +58,37 @@
   color-scheme: light;
 }
 
-/* cianotipo: se cambian solo los tokens */
+/* vision nocturna: la camara de la sala de pruebas. Solo cambian tokens. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-tema="papel"]) {
-    --papel: #143457; --papel-claro: #1b4169; --papel-oscuro: #0f2944;
-    --papel-cinta: #1e4876; --papel-impresion: #173c62;
-    --reticula: rgba(170, 210, 255, .07); --reticula-fuerte: rgba(170, 210, 255, .14);
-    --barra-verde: rgba(150, 205, 255, .08); --nodo-visitado: #2a5687;
-    --tinta: #eaf2fc; --tinta-media: #bfd0e4; --tinta-tenue: #9fb6d0; --tinta-gris: #6f8bab;
-    --azul: #9cc8ff; --senal: #f26a33; --senal-hover: #ff8450; --senal-texto: #ff9662;
-    --senal-suave: #6b3a2c; --sobre-senal: #fff8ee;
-    --ambar: #f0bf5c; --ambar-claro: #f0bf5c; --verde: #84dba6; --rojo: #ff8f80;
-    --azul-inv: #23417d; --ambar-inv: #8a5f0e; --verde-inv: #2c6a4c; --rojo-inv: #b3322a;
-    --tenue-inv: #4f6680; --mezcla-sello: screen;
+    --papel: #070d08; --papel-claro: #0c160e; --papel-oscuro: #040805;
+    --papel-cinta: #0f1d12; --papel-impresion: #0a140c;
+    --reticula: rgba(120, 255, 140, .045); --reticula-fuerte: rgba(120, 255, 140, .09);
+    --barra-verde: rgba(120, 255, 140, .06); --nodo-visitado: #17361d;
+    --tinta: #b8f5bf; --tinta-media: #8fd69a; --tinta-tenue: #6fb27a; --tinta-gris: #3c6b45;
+    --azul: #e4ffe8; --senal: #ff3b2f; --senal-hover: #ff5a4e; --senal-texto: #ff6a5c;
+    --senal-suave: #3a1512; --sobre-senal: #fff4f2;
+    --ambar: #d8f36a; --ambar-claro: #d8f36a; --verde: #7dff96; --rojo: #ff5a4e;
+    --azul-inv: #0b3a14; --ambar-inv: #4b5a06; --verde-inv: #0b5a1f; --rojo-inv: #8f1810;
+    --tenue-inv: #2f5a37; --mezcla-sello: screen;
+    --brillo: 0 0 7px rgba(140, 255, 160, .45);
+    --capa-cctv: 1; --hud: flex;
     color-scheme: dark;
   }
 }
-:root[data-tema="cianotipo"] {
-  --papel: #143457; --papel-claro: #1b4169; --papel-oscuro: #0f2944;
-  --papel-cinta: #1e4876; --papel-impresion: #173c62;
-  --reticula: rgba(170, 210, 255, .07); --reticula-fuerte: rgba(170, 210, 255, .14);
-  --barra-verde: rgba(150, 205, 255, .08); --nodo-visitado: #2a5687;
-  --tinta: #eaf2fc; --tinta-media: #bfd0e4; --tinta-tenue: #9fb6d0; --tinta-gris: #6f8bab;
-  --azul: #9cc8ff; --senal: #f26a33; --senal-hover: #ff8450; --senal-texto: #ff9662;
-  --senal-suave: #6b3a2c; --sobre-senal: #fff8ee;
-  --ambar: #f0bf5c; --ambar-claro: #f0bf5c; --verde: #84dba6; --rojo: #ff8f80;
-  --azul-inv: #23417d; --ambar-inv: #8a5f0e; --verde-inv: #2c6a4c; --rojo-inv: #b3322a;
-  --tenue-inv: #4f6680; --mezcla-sello: screen;
+:root[data-tema="noche"] {
+  --papel: #070d08; --papel-claro: #0c160e; --papel-oscuro: #040805;
+  --papel-cinta: #0f1d12; --papel-impresion: #0a140c;
+  --reticula: rgba(120, 255, 140, .045); --reticula-fuerte: rgba(120, 255, 140, .09);
+  --barra-verde: rgba(120, 255, 140, .06); --nodo-visitado: #17361d;
+  --tinta: #b8f5bf; --tinta-media: #8fd69a; --tinta-tenue: #6fb27a; --tinta-gris: #3c6b45;
+  --azul: #e4ffe8; --senal: #ff3b2f; --senal-hover: #ff5a4e; --senal-texto: #ff6a5c;
+  --senal-suave: #3a1512; --sobre-senal: #fff4f2;
+  --ambar: #d8f36a; --ambar-claro: #d8f36a; --verde: #7dff96; --rojo: #ff5a4e;
+  --azul-inv: #0b3a14; --ambar-inv: #4b5a06; --verde-inv: #0b5a1f; --rojo-inv: #8f1810;
+  --tenue-inv: #2f5a37; --mezcla-sello: screen;
+  --brillo: 0 0 7px rgba(140, 255, 160, .45);
+  --capa-cctv: 1; --hud: flex;
   color-scheme: dark;
 }
 
@@ -126,9 +133,10 @@ button { cursor: pointer; }
   border-bottom: 3px double var(--tinta);
 }
 
-.titulo { display: flex; align-items: flex-end; gap: 18px; padding-bottom: 14px; }
+.titulo { display: flex; align-items: flex-end; gap: 16px; padding-bottom: 14px; }
 
 h1 {
+  text-shadow: var(--brillo);
   margin: 0;
   font: 900 clamp(44px, 6.4vw, 86px)/.8 var(--rotulo);
   text-transform: uppercase;
@@ -151,7 +159,7 @@ h1 {
   grid-template-columns: auto auto;
   align-items: baseline;
   gap: 2px 8px;
-  padding: 9px 16px 10px 12px;
+  padding: 8px 16px 10px 12px;
   margin-bottom: -3px;
   background: var(--papel-oscuro);
   border: 1px solid var(--tinta);
@@ -176,7 +184,7 @@ h1 {
   align-self: end;
   display: flex;
   gap: 8px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 .tema {
   padding: 8px 14px;
@@ -203,11 +211,12 @@ main { padding: 0 var(--margen); }
   display: flex;
   align-items: baseline;
   gap: 12px;
-  margin: 26px 0 14px;
+  margin: 24px 0 14px;
   flex-wrap: wrap;
 }
 .rotulo > span { font: 700 var(--t-m) var(--mono); color: var(--senal-texto); }
 .rotulo h2 {
+  text-shadow: var(--brillo);
   margin: 0;
   font: 700 var(--t-2xl)/1 var(--rotulo);
   text-transform: uppercase;
@@ -224,7 +233,7 @@ main { padding: 0 var(--margen); }
 
 /* ---------- cadenas ------------------------------------------------------ */
 
-.fila-entradas { display: flex; gap: 14px; align-items: stretch; flex-wrap: wrap; margin-bottom: 22px; }
+.fila-entradas { display: flex; gap: 14px; align-items: stretch; flex-wrap: wrap; margin-bottom: 24px; }
 .entradas { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* cada cadena es un boleto: talon con muescas a los lados y linea de corte */
@@ -234,7 +243,7 @@ main { padding: 0 var(--margen); }
   grid-template-columns: auto auto;
   column-gap: 14px;
   align-items: center;
-  padding: 8px 18px 8px 14px;
+  padding: 8px 16px 8px 14px;
   border: 0;
   background:
     linear-gradient(90deg, transparent 43px, color-mix(in srgb, var(--tinta) 35%, transparent) 43px 44px, transparent 44px) 0 0 / 100% 100%,
@@ -328,6 +337,7 @@ main { padding: 0 var(--margen); }
 }
 
 .celda {
+  text-shadow: var(--brillo);
   position: relative;
   flex: 0 0 var(--celda);
   height: 100%;
@@ -442,7 +452,7 @@ main { padding: 0 var(--margen); }
   z-index: 6;
   right: calc(var(--margen) + 3%);
   top: 26px;
-  padding: 10px 18px 8px;
+  padding: 10px 16px 8px;
   border: 4px double currentColor;
   font: 900 40px/1 var(--rotulo);
   letter-spacing: .06em;
@@ -452,7 +462,7 @@ main { padding: 0 var(--margen); }
   mix-blend-mode: var(--mezcla-sello);
   pointer-events: none;
 }
-.sello small { display: block; font: 700 var(--t-xs)/1.35 var(--mono); letter-spacing: 0; text-transform: none; margin-top: 5px; max-width: 34ch; }
+.sello small { display: block; font: 700 var(--t-xs)/1.35 var(--mono); letter-spacing: 0; text-transform: none; margin-top: 4px; max-width: 34ch; }
 .sello.si { color: var(--verde); }
 .sello.no { color: var(--rojo); }
 .sello.alto { color: var(--ambar); }
@@ -467,14 +477,15 @@ main { padding: 0 var(--margen); }
 .lectura {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 18px 44px;
+  gap: 16px 44px;
   align-items: end;
-  padding: 18px 0 14px;
+  padding: 16px 0 14px;
   border-bottom: 1px solid var(--tinta);
 }
-.control-finito { display: grid; grid-template-columns: auto auto; column-gap: 18px; align-items: end; }
+.control-finito { display: grid; grid-template-columns: auto auto; column-gap: 16px; align-items: end; }
 .control-finito > .etq { grid-column: 1 / -1; margin-bottom: 6px; }
 .estado-grande {
+  text-shadow: var(--brillo);
   font: 900 60px/.85 var(--rotulo);
   color: var(--azul);
   min-width: 2.2ch;
@@ -488,7 +499,7 @@ main { padding: 0 var(--margen); }
   padding: 6px 12px;
   border: 1.5px solid var(--ambar);
   color: var(--ambar);
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 .cache-caja .etq { color: var(--ambar); }
 .cache-caja .etq::before { content: none; }
@@ -507,7 +518,8 @@ main { padding: 0 var(--margen); }
 .regla-actual .m { color: var(--senal-texto); font-weight: 700; }
 
 .contador { text-align: right; }
-.contador output { font: 900 52px/.85 var(--rotulo); font-variant-numeric: tabular-nums; }
+.contador output {
+  text-shadow: var(--brillo); font: 900 52px/.85 var(--rotulo); font-variant-numeric: tabular-nums; }
 .contador .de { font: 700 var(--t-m) var(--mono); color: var(--tinta-tenue); margin-left: 6px; }
 
 /* ---------- mandos -------------------------------------------------------- */
@@ -515,7 +527,7 @@ main { padding: 0 var(--margen); }
 .mandos {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 16px 30px;
+  gap: 16px 32px;
   align-items: center;
   padding: 14px 0 6px;
 }
@@ -539,7 +551,7 @@ main { padding: 0 var(--margen); }
 }
 .botones .play:hover { background: var(--senal-hover); }
 
-.linea-tiempo, .velocidad { display: grid; gap: 7px; }
+.linea-tiempo, .velocidad { display: grid; gap: 8px; }
 .velocidad { grid-template-columns: 140px auto; align-items: center; }
 .velocidad .etq { grid-column: 1 / -1; }
 .velocidad output { font: 700 var(--t-m) var(--mono); min-width: 2ch; }
@@ -592,7 +604,7 @@ input[type=range]::-moz-range-thumb {
 .diagrama svg.moviendo { cursor: grabbing; }
 .diagrama .acciones { display: flex; }
 .diagrama .acciones button {
-  padding: 3px 10px;
+  padding: 4px 10px;
   margin-left: -1px;
   border: 1px solid var(--tinta);
   background: var(--papel-claro);
@@ -610,12 +622,12 @@ input[type=range]::-moz-range-thumb {
 .m-cinta { color: var(--tinta); font-weight: 600; }
 .m-cache { color: var(--ambar); font-weight: 600; margin-right: 8px; }
 
-.arista path { fill: none; stroke: var(--tinta-media); stroke-width: 1.4; }
-.arista text { font: 700 var(--t-xs) var(--mono); fill: var(--tinta); paint-order: stroke; stroke: var(--papel-claro); stroke-width: 4px; stroke-linejoin: round; }
-.arista text .c { fill: var(--ambar); }
-.arista text .mas { fill: var(--tinta-tenue); font-style: italic; }
+.arista path { fill: none; stroke: var(--tinta-media); stroke-width: 1.4; stroke-linecap: round; }
+.etiqueta text { font: 700 var(--t-xs) var(--mono); fill: var(--tinta); paint-order: stroke; stroke: var(--papel-claro); stroke-width: 4px; stroke-linejoin: round; }
+.etiqueta text .c { fill: var(--ambar); }
+.etiqueta text .mas { fill: var(--tinta-tenue); font-style: italic; }
 .arista.usada path { stroke: var(--senal); stroke-width: 2.6; stroke-dasharray: 7 4; animation: correr .6s linear infinite; }
-.arista.usada text { fill: var(--senal); font-weight: 600; }
+.etiqueta.usada text { fill: var(--senal-texto); }
 @keyframes correr { to { stroke-dashoffset: -11; } }
 
 .nodo { cursor: grab; }
@@ -645,7 +657,7 @@ input[type=range]::-moz-range-thumb {
 .papel ol {
   list-style: none;
   margin: 0;
-  padding: 0 34px;
+  padding: 0 36px;
   font: var(--t-m)/26px var(--mono);
   background:
     radial-gradient(circle at 15px 13px, var(--papel-oscuro) 4.5px, color-mix(in srgb, var(--tinta) 18%, transparent) 5px, transparent 5.6px) left top / 34px 26px repeat-y,
@@ -691,12 +703,12 @@ input[type=range]::-moz-range-thumb {
 }
 .pestanas button[aria-selected="true"] { background: var(--tinta); color: var(--papel-claro); }
 
-.panel { border-top: 1px solid var(--tinta); padding-top: 18px; }
+.panel { border-top: 1px solid var(--tinta); padding-top: 16px; }
 
 .formal {
   display: grid;
   grid-template-columns: 58px 1fr;
-  gap: 10px 18px;
+  gap: 10px 16px;
   margin: 0;
   font: 700 var(--t-l)/1.5 var(--mono);
   max-width: 980px;
@@ -707,7 +719,7 @@ input[type=range]::-moz-range-thumb {
 .simb {
   display: inline-block;
   min-width: 26px;
-  padding: 0 7px;
+  padding: 0 8px;
   border: 1px solid var(--tinta);
   background: var(--papel-claro);
   text-align: center;
@@ -826,7 +838,7 @@ body.soltando::after {
   .sello { font-size: var(--t-2xl); }
   .propia input { width: 100%; }
   .fichas { flex-wrap: nowrap; overflow-x: auto; padding-top: 4px; scrollbar-width: none; }
-  .ficha { padding: 7px 12px 8px 10px; }
+  .ficha { padding: 8px 12px 8px 10px; }
   .ficha .nom { font-size: var(--t-m); }
   .cinta-marco { height: 176px; }
   .cinta { top: 50px; height: 80px; }
@@ -837,4 +849,134 @@ body.soltando::after {
   .papel { max-height: 420px; }
   .papel { height: 420px; }
   .propia { width: 100%; }
+}
+
+/* ---------- protocolo de pruebas ------------------------------------------ */
+
+.franja {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px var(--margen);
+  background: var(--tinta);
+  color: var(--papel-claro);
+  font: 700 var(--t-xs)/1 var(--mono);
+  letter-spacing: .02em;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.franja .cinta-peligro {
+  flex: 0 0 64px;
+  height: 12px;
+  background: repeating-linear-gradient(-45deg, var(--senal) 0 8px, transparent 8px 16px);
+}
+.franja .cinta-peligro:last-child { margin-left: auto; }
+.franja .parpadeo { color: var(--senal); animation: luz 1.6s steps(1) infinite; }
+@keyframes luz { 50% { opacity: .15; } }
+
+.censura {
+  background: var(--tinta);
+  color: transparent;
+  padding: 0 4px;
+  border-radius: 1px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  user-select: none;
+}
+.censura:hover { color: var(--papel-claro); }
+
+.fila-entradas .etq { flex-basis: 100%; margin-bottom: -6px; }
+.entrada .w::after {
+  content: attr(data-sujeto);
+  display: block;
+  font: italic 500 var(--t-xs)/1 var(--cuerpo);
+  color: var(--tinta-tenue);
+  margin-top: 2px;
+}
+.entrada[aria-selected="true"] .w::after { color: var(--tenue-inv); }
+
+/* camara de vigilancia: lineas de barrido, vineta y parpadeo */
+body::before, body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: var(--capa-cctv);
+}
+body::before {
+  background:
+    repeating-linear-gradient(rgba(0, 0, 0, .28) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, .75) 100%);
+}
+body::after {
+  background: rgba(120, 255, 140, .035);
+  animation: zumbido 7s infinite;
+}
+@keyframes zumbido {
+  0%, 100% { opacity: calc(var(--capa-cctv) * 1); }
+  47% { opacity: calc(var(--capa-cctv) * 1); }
+  48% { opacity: calc(var(--capa-cctv) * .2); }
+  49% { opacity: calc(var(--capa-cctv) * 1.6); }
+  51% { opacity: calc(var(--capa-cctv) * .6); }
+}
+
+.hud {
+  position: fixed;
+  z-index: 41;
+  top: 34px;
+  right: 22px;
+  display: var(--hud);
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font: 700 var(--t-s)/1 var(--mono);
+  color: var(--tinta);
+  text-shadow: var(--brillo);
+  pointer-events: none;
+}
+.hud .rec { color: var(--senal); }
+.hud .rec::before { content: "●"; margin-right: 6px; animation: luz 1s steps(1) infinite; }
+.hud .tc { font-size: var(--t-l); letter-spacing: .04em; }
+.hud .esquinas {
+  position: fixed;
+  inset: 12px;
+  border: 2px solid transparent;
+  border-image: linear-gradient(var(--tinta), var(--tinta)) 1;
+  -webkit-mask:
+    linear-gradient(#000 0 0) top left / 28px 28px no-repeat,
+    linear-gradient(#000 0 0) top right / 28px 28px no-repeat,
+    linear-gradient(#000 0 0) bottom left / 28px 28px no-repeat,
+    linear-gradient(#000 0 0) bottom right / 28px 28px no-repeat;
+          mask:
+    linear-gradient(#000 0 0) top left / 28px 28px no-repeat,
+    linear-gradient(#000 0 0) top right / 28px 28px no-repeat,
+    linear-gradient(#000 0 0) bottom left / 28px 28px no-repeat,
+    linear-gradient(#000 0 0) bottom right / 28px 28px no-repeat;
+  opacity: .55;
+}
+
+/* alarma cuando una cadena queda rechazada */
+.alarma {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: inset 0 0 140px 30px var(--rojo);
+}
+.alarma.sonando { animation: alarma 1.3s ease-out; }
+@keyframes alarma {
+  0%, 40% { opacity: 0; }
+  10%, 50% { opacity: .55; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after, .franja .parpadeo, .hud .rec::before { animation: none; }
+  .alarma.sonando { animation: none; }
+}
+@media (max-width: 560px) {
+  .hud { display: none; }
+  .franja .cinta-peligro { display: none; }
 }

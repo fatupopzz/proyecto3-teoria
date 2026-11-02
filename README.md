@@ -76,6 +76,9 @@ Abrir <http://127.0.0.1:5050>.
   clic sobre una ID de la impresión también lleva a ese paso.
 - En el diagrama los estados se pueden arrastrar (la posición se recuerda), `Ctrl/⌘ + rueda`
   acerca o aleja, el doble clic encuadra y **ampliar** lo pone en pantalla completa.
+- **◐** alterna entre el *expediente* en papel y la *visión nocturna* de la cámara de la
+  sala de pruebas, con código de tiempo que avanza con cada paso de la MT. Por defecto
+  sigue el tema del sistema.
 - En **definición → yaml** se puede editar la máquina y cargar los cambios
   (`Ctrl/⌘ + Enter`). Los errores se marcan con su número de línea.
 
