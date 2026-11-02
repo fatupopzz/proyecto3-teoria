@@ -67,20 +67,26 @@ python app.py
 
 Abrir <http://127.0.0.1:5050>.
 
-- Las fichas de arriba cambian de máquina. **abrir .yaml** carga cualquier archivo
-  propio (también se puede arrastrar y soltar sobre la página).
-- Cada boleto es una de las `inputs` del YAML, con su resultado y número de pasos.
-  En *otra cadena…* se simula una cadena nueva sin tocar el archivo.
-- Controles: `espacio` reproduce o pausa, `←` `→` avanzan un paso, `Home` y `End` van
-  al inicio y al final. La regla de *recorrido* permite saltar a cualquier paso, y un
-  clic sobre una ID de la impresión también lleva a ese paso.
-- En el diagrama los estados se pueden arrastrar (la posición se recuerda), `Ctrl/⌘ + rueda`
-  acerca o aleja, el doble clic encuadra y **ampliar** lo pone en pantalla completa.
-- **◐** alterna entre el *expediente* en papel y la *visión nocturna* de la cámara de la
-  sala de pruebas, con código de tiempo que avanza con cada paso de la MT. Por defecto
-  sigue el tema del sistema.
-- En **definición → yaml** se puede editar la máquina y cargar los cambios
-  (`Ctrl/⌘ + Enter`). Los errores se marcan con su número de línea.
+En escritorio todo cabe en una pantalla:
+
+- **Fichas** (arriba): cambian de máquina. **abrir .yaml** carga un archivo propio (también
+  se puede arrastrar y soltar sobre la página).
+- **Riel de sujetos** (izquierda): cada boleto es una de las `inputs` del YAML con su
+  resultado y número de pasos; en *otra cadena…* se simula una cadena nueva sin tocar el
+  archivo.
+- **Cinta** (arriba al centro): la cinta se desliza bajo la cabeza; debajo, estado, cache,
+  regla aplicada, paso y los controles. `espacio` reproduce o pausa, `←` `→` avanzan un
+  paso, `Home` y `End` van al inicio y al final.
+- **Control finito** y **descripciones instantáneas** (abajo): el diagrama resalta la
+  regla usada; los estados se arrastran (la posición se recuerda), `Ctrl/⌘ + rueda`
+  acerca, doble clic encuadra y **ampliar** lo pone en pantalla completa. Un clic sobre una
+  ID lleva a ese paso.
+- **Expediente** (lengüeta a la derecha): definición formal, tabla δ y editor YAML
+  (`Ctrl/⌘ + Enter` carga los cambios; los errores marcan la línea). `Esc` lo cierra.
+- **◐** alterna entre el *expediente* en papel y la *visión nocturna*, donde las tres
+  zonas se vuelven cámaras de vigilancia (CAM 01–03) con código de tiempo que avanza con
+  cada paso. La franja superior dice qué máquina corre y si el sujeto está en espera,
+  registrando, en pausa, aceptado o rechazado.
 
 ### Versión estática (GitHub Pages)
 

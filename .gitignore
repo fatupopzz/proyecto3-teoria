@@ -5,3 +5,4 @@ __pycache__/
 salidas/
 .DS_Store
 _site/
+.superdesign/

@@ -232,8 +232,8 @@ function renderFichas() {
     E.fichas.append(h("button", {
       class: "ficha", "aria-current": String(f.activa),
       onclick: () => { if (!f.activa) f.abrir(); },
-    }, h("span", { class: "num" }, f.num), h("span", { class: "nom" }, f.nom),
-       h("span", { class: "tipo" }, f.tipo)));
+      title: f.tipo,
+    }, h("span", { class: "num" }, f.num), h("span", { class: "nom" }, f.nom)));
   }
   E.pieArchivo.textContent = (S.archivo ? "maquinas/" + S.archivo : (S.subido?.nombre || ""))
     + " · simulando con " + motor.nombre;
@@ -280,6 +280,7 @@ function renderMaquina() {
   // lo tachado del expediente es el tipo de prueba; se lee pasando el cursor
   $("#censura").textContent = S.archivo ? tipoDe(S.archivo) : "archivo propio";
   E.descripcion.textContent = m.descripcion || "";
+  E.descripcion.title = m.descripcion || "";
   E.cacheCaja.hidden = !m.usaCache;
   renderFormal();
   renderDelta();
@@ -842,7 +843,7 @@ function marcarEstado() {
   const el = $("#franja-estado");
   if (el.textContent !== texto) el.textContent = texto;
   el.classList.toggle("vivo", vivo);
-  const rec = document.querySelector(".hud .rec");
+  const rec = $("#rec");
   rec.textContent = vivo ? "REC" : texto.replace(/^\S+\s/, "").toUpperCase();
   rec.classList.toggle("quieto", !vivo);
 }
@@ -851,8 +852,9 @@ function marcarEstado() {
 function marcarHud(r, p) {
   const f = p % 24, seg = Math.floor(p / 24);
   const dos = (n) => String(n).padStart(2, "0");
-  $("#hud-tc").textContent = `${dos(Math.floor(seg / 3600))}:${dos(Math.floor(seg / 60) % 60)}:${dos(seg % 60)}:${dos(f)}`;
-  $("#hud-sujeto").textContent = `sujeto ${String(S.sel + 1).padStart(2, "0")} · w = ${r.entrada || "ε"}`;
+  const tc = `${dos(Math.floor(seg / 3600))}:${dos(Math.floor(seg / 60) % 60)}:${dos(seg % 60)}:${dos(f)}`;
+  document.querySelectorAll("[data-tc]").forEach((n) => { n.textContent = tc; });
+  $("#cam-sujeto").textContent = `sujeto ${String(S.sel + 1).padStart(2, "0")} · w = ${r.entrada || "ε"}`;
 }
 
 function ponerSello(r, golpe) {
@@ -995,6 +997,7 @@ function actualizarNumeros(lineaError = null) {
 function mostrarError(d) {
   E.error.textContent = (d.linea ? `línea ${d.linea}: ` : "") + d.error;
   actualizarNumeros(d.linea || null);
+  abrirExpediente();
   abrirPestana("p-yaml");
   if (d.linea) {
     const lineas = E.yaml.value.split("\n");
@@ -1003,8 +1006,31 @@ function mostrarError(d) {
     E.yaml.setSelectionRange(ini, ini + (lineas[d.linea - 1] || "").length);
     E.yaml.scrollTop = Math.max(0, (d.linea - 6) * 20);
   }
-  E.yaml.scrollIntoView({ behavior: "smooth", block: "center" });
 }
+
+// ---------- cajon del expediente (definicion, tabla δ, yaml) ----------
+
+const cajon = $("#expediente");
+const lengueta = $("#lengueta");
+
+function abrirExpediente() {
+  if (cajon.classList.contains("abierto")) return;
+  cajon.inert = false;
+  cajon.classList.add("abierto");
+  lengueta.setAttribute("aria-expanded", "true");
+  $("#cerrar-expediente").focus({ preventScroll: true });
+}
+
+function cerrarExpediente() {
+  if (!cajon.classList.contains("abierto")) return;
+  cajon.classList.remove("abierto");
+  cajon.inert = true;
+  lengueta.setAttribute("aria-expanded", "false");
+  lengueta.focus({ preventScroll: true });
+}
+
+lengueta.onclick = () => (cajon.classList.contains("abierto") ? cerrarExpediente() : abrirExpediente());
+$("#cerrar-expediente").onclick = cerrarExpediente;
 
 function limpiarError() {
   E.error.textContent = "";
@@ -1083,7 +1109,8 @@ window.addEventListener("drop", (ev) => {
 });
 
 document.addEventListener("keydown", (ev) => {
-  if (ev.target.closest("input, textarea") || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+  if (ev.key === "Escape" && cajon.classList.contains("abierto")) { cerrarExpediente(); return; }
+  if (ev.target.closest("input, textarea, .expediente") || ev.metaKey || ev.ctrlKey || ev.altKey) return;
   if (ev.key === " ") { ev.preventDefault(); S.reproduciendo ? pausar() : reproducir(); }
   else if (ev.key === "ArrowRight") { pausar(); irA(S.paso + 1); }
   else if (ev.key === "ArrowLeft") { pausar(); irA(S.paso - 1); }

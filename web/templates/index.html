@@ -21,12 +21,6 @@
 <body>
   <a class="saltar" href="#t-cinta">saltar a la cinta</a>
   <div class="alarma" id="alarma" aria-hidden="true"></div>
-  <div class="hud" aria-hidden="true">
-    <span class="esquinas"></span>
-    <span class="rec">REC</span>
-    <span class="tc" id="hud-tc">00:00:00:00</span>
-    <span id="hud-sujeto">sala 3 · cám. 2</span>
-  </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <filter id="tinta" x="-10%" y="-10%" width="120%" height="120%">
       <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="ruido"/>
@@ -40,136 +34,144 @@
     </filter>
   </svg>
 
-  <div class="franja" role="note">
-    <span class="cinta-peligro" aria-hidden="true"></span>
-    <span>PROTOCOLO MT-03</span>
-    <span aria-hidden="true">·</span>
-    <span class="maquina-prueba" id="franja-maquina">prueba de computabilidad sobre una cinta</span>
-    <span class="estado-prueba" id="franja-estado" role="status">○ en espera</span>
-    <span class="cinta-peligro" aria-hidden="true"></span>
-  </div>
-
-  <header class="cabecera">
-    <div class="titulo">
-      <h1>Máquina<br>de Turing</h1>
-      <p class="nota">simulador de una cinta · expediente <span class="censura" id="censura" tabindex="0" title="pase el cursor para leer">clasificado</span><br>teoría de la computación · proyecto 3</p>
+  <div class="aparato">
+    <div class="franja" role="note">
+      <span class="cinta-peligro" aria-hidden="true"></span>
+      <span>PROTOCOLO MT-03</span>
+      <span aria-hidden="true">·</span>
+      <span class="maquina-prueba" id="franja-maquina">prueba de computabilidad sobre una cinta</span>
+      <span class="estado-prueba" id="franja-estado" role="status">○ en espera</span>
+      <span class="cinta-peligro" aria-hidden="true"></span>
     </div>
-    <nav class="fichas" id="fichas" aria-label="Máquinas"></nav>
-    <div class="herramientas">
-      <button type="button" class="tema" id="tema" title="Cambiar entre expediente y visión nocturna"></button>
-      <label class="abrir" title="Abrir un archivo .yaml (también se puede soltar sobre la página)">
-        <input type="file" id="archivo" accept=".yaml,.yml">
-        <span>abrir .yaml</span>
-      </label>
-    </div>
-  </header>
 
-  <main>
-    <section class="banco" aria-labelledby="t-cinta">
-      <div class="rotulo"><span>§1</span><h2 id="t-cinta">cinta</h2>
-        <p class="maquina-desc" id="descripcion"></p>
+    <header class="cabecera">
+      <div class="titulo">
+        <h1>Máquina de Turing</h1>
+        <p class="nota">simulador de una cinta · expediente <span class="censura" id="censura" tabindex="0" title="pase el cursor para leer">clasificado</span><br>teoría de la computación · proyecto 3</p>
       </div>
+      <nav class="fichas" id="fichas" aria-label="Máquinas"></nav>
+      <div class="herramientas">
+        <button type="button" class="tema" id="tema" title="Cambiar entre expediente y visión nocturna"></button>
+        <label class="abrir" title="Abrir un archivo .yaml (también se puede soltar sobre la página)">
+          <input type="file" id="archivo" accept=".yaml,.yml">
+          <span>abrir .yaml</span>
+        </label>
+      </div>
+    </header>
 
-      <div class="fila-entradas">
-        <span class="etq">sujetos de prueba</span>
-        <div class="entradas" id="entradas" role="group" aria-label="Cadenas de prueba"></div>
+    <main class="sala">
+      <aside class="riel" aria-labelledby="t-sujetos">
+        <h2 id="t-sujetos" class="riel-titulo"><span class="solo-papel">sujetos de prueba</span><span class="solo-noche">evidencia · sujetos</span></h2>
+        <div class="entradas" id="entradas" role="group" aria-labelledby="t-sujetos"></div>
         <form class="propia" id="propia">
           <input id="cadena" placeholder="otra cadena…" autocomplete="off" aria-label="Cadena a simular">
           <button type="submit">simular</button>
         </form>
-      </div>
+        <p class="riel-pie">
+          <span>espacio reproduce · ← → paso · Home / End</span>
+          <span id="pie-archivo"></span>
+        </p>
+      </aside>
 
-      <div class="cinta-marco" id="cinta-marco">
-        <div class="carro" aria-hidden="true"><span>cabeza</span></div>
-        <div class="cinta" id="cinta"></div>
-        <div class="regla-posiciones" id="posiciones" aria-hidden="true"></div>
-        <div class="sello" id="sello" hidden></div>
-        <p class="aviso" id="aviso" hidden></p>
-      </div>
+      <section class="camara cam-cinta" aria-labelledby="t-cinta">
+        <div class="rotulo">
+          <span class="cam" aria-hidden="true">CAM 01</span><span class="sec">§1</span><h2 id="t-cinta">cinta</h2>
+          <p class="maquina-desc" id="descripcion"></p>
+          <span class="hud-cam" aria-hidden="true"><span class="rec" id="rec">REC</span><span id="cam-sujeto"></span><span class="tc" data-tc>00:00:00:00</span></span>
+        </div>
 
-      <div class="lectura">
-        <div class="control-finito">
-          <span class="etq">estado</span>
-          <output id="estado" class="estado-grande">q0</output>
-          <span class="cache-caja" id="cache-caja"><span class="etq">cache</span><output id="cache">B</output></span>
+        <div class="cinta-marco" id="cinta-marco">
+          <div class="carro" aria-hidden="true"><span>cabeza</span></div>
+          <div class="cinta" id="cinta"></div>
+          <div class="regla-posiciones" id="posiciones" aria-hidden="true"></div>
+          <div class="sello" id="sello" hidden></div>
+          <p class="aviso" id="aviso" hidden></p>
         </div>
-        <div class="regla-actual">
-          <span class="etq">regla aplicada</span>
-          <output id="regla">configuración inicial</output>
-        </div>
-        <div class="contador">
-          <span class="etq">paso</span>
-          <output id="paso">0</output><span class="de">/ <span id="total">0</span></span>
-        </div>
-      </div>
 
-      <div class="mandos">
-        <div class="botones">
-          <button id="b-inicio" title="Inicio (Home)" aria-label="Ir al inicio">⏮</button>
-          <button id="b-atras" title="Paso atrás (←)" aria-label="Paso atrás">◀</button>
-          <button id="b-play" class="play" title="Reproducir / pausar (espacio)" aria-label="Reproducir">▶</button>
-          <button id="b-adelante" title="Paso adelante (→)" aria-label="Paso adelante">▶</button>
-          <button id="b-fin" title="Final (End)" aria-label="Ir al final">⏭</button>
+        <div class="tablero">
+          <div class="control-finito">
+            <span class="etq">estado</span>
+            <output id="estado" class="estado-grande">q0</output>
+            <span class="cache-caja" id="cache-caja"><span class="etq">cache</span><output id="cache">B</output></span>
+          </div>
+          <div class="regla-actual">
+            <span class="etq">regla aplicada</span>
+            <output id="regla">configuración inicial</output>
+          </div>
+          <div class="contador">
+            <span class="etq">paso</span>
+            <output id="paso">0</output><span class="de">/ <span id="total">0</span></span>
+          </div>
+          <div class="botones">
+            <button id="b-inicio" title="Inicio (Home)" aria-label="Ir al inicio">⏮</button>
+            <button id="b-atras" title="Paso atrás (←)" aria-label="Paso atrás">◀</button>
+            <button id="b-play" class="play" title="Reproducir / pausar (espacio)" aria-label="Reproducir">▶</button>
+            <button id="b-adelante" title="Paso adelante (→)" aria-label="Paso adelante">▶</button>
+            <button id="b-fin" title="Final (End)" aria-label="Ir al final">⏭</button>
+          </div>
+          <label class="linea-tiempo">
+            <span class="etq">recorrido</span>
+            <input type="range" id="tiempo" min="0" max="0" value="0">
+          </label>
+          <label class="velocidad">
+            <span class="etq">pasos / s</span>
+            <input type="range" id="velocidad" min="1" max="60" value="8">
+            <output id="vel-txt">8</output>
+          </label>
         </div>
-        <label class="linea-tiempo">
-          <span class="etq">recorrido</span>
-          <input type="range" id="tiempo" min="0" max="0" value="0">
-        </label>
-        <label class="velocidad">
-          <span class="etq">pasos / s</span>
-          <input type="range" id="velocidad" min="1" max="60" value="8">
-          <output id="vel-txt">8</output>
-        </label>
-      </div>
-    </section>
+      </section>
 
-    <div class="mesa">
-      <section class="diagrama" aria-labelledby="t-control">
-        <div class="rotulo"><span>§2</span><h2 id="t-control">control finito</h2>
-          <p class="pista">arrastre los estados · ctrl + rueda acerca · doble clic encuadra</p>
+      <section class="camara diagrama" aria-labelledby="t-control">
+        <div class="rotulo">
+          <span class="cam" aria-hidden="true">CAM 02</span><span class="sec">§2</span><h2 id="t-control">control finito</h2>
           <div class="acciones">
-            <button id="reacomodar" type="button">reacomodar</button>
-            <button id="ampliar" type="button">ampliar ⤢</button>
-          </div></div>
+            <button id="reacomodar" type="button" title="Volver al acomodo automático">reacomodar</button>
+            <button id="ampliar" type="button" title="Pantalla completa">ampliar ⤢</button>
+          </div>
+          <span class="hud-cam" aria-hidden="true"><span class="tc" data-tc>00:00:00:00</span></span>
+        </div>
         <svg id="grafo" role="img" aria-label="Diagrama de estados"></svg>
         <p class="leyenda"><span class="m-cinta">símbolo</span><span class="m-cache">·cache</span>
-          leído → escrito, movimiento</p>
+          leído → escrito, movimiento · arrastre los estados · ctrl + rueda acerca · doble clic encuadra</p>
       </section>
 
-      <section class="impresion" aria-labelledby="t-ids">
-        <div class="rotulo"><span>§3</span><h2 id="t-ids">descripciones instantáneas</h2></div>
+      <section class="camara impresion" aria-labelledby="t-ids">
+        <div class="rotulo">
+          <span class="cam" aria-hidden="true">CAM 03</span><span class="sec">§3</span><h2 id="t-ids">descripciones instantáneas</h2>
+          <span class="hud-cam" aria-hidden="true"><span class="tc" data-tc>00:00:00:00</span></span>
+        </div>
         <div class="papel" id="papel"><ol id="ids"></ol></div>
       </section>
+    </main>
+  </div>
+
+  <aside class="expediente" id="expediente" aria-labelledby="t-def" inert>
+    <div class="rotulo">
+      <span class="sec">§4</span><h2 id="t-def">definición</h2>
+      <div class="pestanas" role="tablist" aria-label="Vista de la definición">
+        <button role="tab" id="tab-formal" aria-controls="p-formal" data-panel="p-formal" aria-selected="true">M = (Q, Σ, Γ, δ, q₀, B, F)</button>
+        <button role="tab" id="tab-delta" aria-controls="p-delta" data-panel="p-delta" aria-selected="false">tabla δ</button>
+        <button role="tab" id="tab-yaml" aria-controls="p-yaml" data-panel="p-yaml" aria-selected="false">yaml</button>
+      </div>
+      <button type="button" class="cerrar" id="cerrar-expediente" aria-label="Cerrar el expediente">✕</button>
     </div>
 
-    <section class="archivo" aria-labelledby="t-def">
-      <div class="rotulo"><span>§4</span><h2 id="t-def">definición</h2>
-        <div class="pestanas" role="tablist" aria-label="Vista de la definición">
-          <button role="tab" id="tab-formal" aria-controls="p-formal" data-panel="p-formal" aria-selected="true">M = (Q, Σ, Γ, δ, q₀, B, F)</button>
-          <button role="tab" id="tab-delta" aria-controls="p-delta" data-panel="p-delta" aria-selected="false">tabla δ</button>
-          <button role="tab" id="tab-yaml" aria-controls="p-yaml" data-panel="p-yaml" aria-selected="false">yaml</button>
-        </div>
+    <div class="panel" id="p-formal" role="tabpanel" aria-labelledby="tab-formal"></div>
+    <div class="panel" id="p-delta" role="tabpanel" aria-labelledby="tab-delta" hidden></div>
+    <div class="panel" id="p-yaml" role="tabpanel" aria-labelledby="tab-yaml" hidden>
+      <div class="editor">
+        <pre class="numeros" id="numeros" aria-hidden="true"></pre>
+        <textarea id="yaml" spellcheck="false" aria-label="Descripción YAML de la máquina"></textarea>
       </div>
-
-      <div class="panel" id="p-formal" role="tabpanel" aria-labelledby="tab-formal"></div>
-      <div class="panel" id="p-delta" role="tabpanel" aria-labelledby="tab-delta" hidden></div>
-      <div class="panel" id="p-yaml" role="tabpanel" aria-labelledby="tab-yaml" hidden>
-        <div class="editor">
-          <pre class="numeros" id="numeros" aria-hidden="true"></pre>
-          <textarea id="yaml" spellcheck="false" aria-label="Descripción YAML de la máquina"></textarea>
-        </div>
-        <div class="editor-pie">
-          <p class="error" id="error" role="alert"></p>
-          <button id="aplicar" class="primario">cargar cambios</button>
-        </div>
+      <div class="editor-pie">
+        <p class="error" id="error" role="alert"></p>
+        <button id="aplicar" class="primario">cargar cambios</button>
       </div>
-    </section>
-  </main>
-
-  <footer class="pie">
-    <span>teclado: espacio reproducir · ← → paso · Home / End</span>
-    <span id="pie-archivo"></span>
-  </footer>
+    </div>
+  </aside>
+  <button type="button" class="lengueta" id="lengueta" aria-controls="expediente" aria-expanded="false">
+    <span>expediente</span><small>definición · δ · yaml</small>
+  </button>
 
   <script src="static/visor.js"></script>
 </body>
