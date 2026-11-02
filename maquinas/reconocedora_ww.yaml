@@ -1,0 +1,108 @@
+# MT reconocedora:  L = { ww | w ∈ {a, b}+ }
+#
+# Una cadena es aceptada si su primera mitad es exactamente igual a la segunda
+# (abaaba = aba·aba). No es libre de contexto, asi que no hay AP que la
+# reconozca: hace falta la cinta.
+#
+# Fase 1 - encontrar la mitad (q0..q3)
+#   Se marca el simbolo mas a la izquierda sin marcar (a->X, b->Y), se corre
+#   al extremo derecho sin marcar y se marca tambien; se repite cerrando desde
+#   ambos lados. Si al ir a la derecha ya no queda nada, la longitud es impar
+#   y la MT se detiene sin aceptar.
+# Fase 2 - desmarcar la segunda mitad (q4, q5)
+#   Cuando q0 choca con una marca, esta parado al inicio de la segunda mitad:
+#   la devuelve a minusculas para distinguir ambas mitades.
+# Fase 3 - comparar usando el cache del estado (q6..q8)
+#   q6 toma el siguiente simbolo de la primera mitad, lo guarda en el cache
+#   ([q7, a] o [q7, b]) y lo tacha con Z. q7 viaja a la derecha cargando ese
+#   simbolo hasta el primero sin tachar de la segunda mitad y solo avanza si
+#   coincide. q8 regresa al inicio. Si todo se tacho, acepta.
+#
+# Convencion del cache:  read = [simbolo en cinta, cache]
+#                        write = [nuevo cache, simbolo a escribir]
+#                        read: a  equivale a  read: [a, B]  (cache vacio)
+
+mt:
+  name: "Reconocedora  ww"
+  description: >
+    Acepta las cadenas de la forma ww con w en {a,b}+. Encuentra la mitad
+    marcando desde ambos extremos y luego compara simbolo por simbolo
+    cargando cada letra en el cache del estado.
+
+  states: [q0, q1, q2, q3, q4, q5, q6, q7, q8, qf]
+  input_alphabet: [a, b]
+  tape_alphabet: [a, b, X, Y, Z, B]
+  initial_state: q0
+  accept_states: [qf]
+
+  transitions:
+    # --- Fase 1: marcar desde la izquierda --------------------------------
+    - {state: q0, read: a, write: X, move: R, next: q1}
+    - {state: q0, read: b, write: Y, move: R, next: q1}
+    # q0 encontro una marca: ya se llego a la mitad
+    - {state: q0, read: X, write: a, move: R, next: q4}
+    - {state: q0, read: Y, write: b, move: R, next: q4}
+
+    # --- correr al extremo derecho sin marcar -----------------------------
+    - {state: q1, read: a, write: a, move: R, next: q1}
+    - {state: q1, read: b, write: b, move: R, next: q1}
+    - {state: q1, read: X, write: X, move: L, next: q2}
+    - {state: q1, read: Y, write: Y, move: L, next: q2}
+    - {state: q1, read: B, write: B, move: L, next: q2}
+
+    # --- marcar desde la derecha (si lee X/Y la longitud es impar) --------
+    - {state: q2, read: a, write: X, move: L, next: q3}
+    - {state: q2, read: b, write: Y, move: L, next: q3}
+
+    # --- volver a la ultima marca izquierda -------------------------------
+    - {state: q3, read: a, write: a, move: L, next: q3}
+    - {state: q3, read: b, write: b, move: L, next: q3}
+    - {state: q3, read: X, write: X, move: R, next: q0}
+    - {state: q3, read: Y, write: Y, move: R, next: q0}
+
+    # --- Fase 2: segunda mitad a minusculas -------------------------------
+    - {state: q4, read: X, write: a, move: R, next: q4}
+    - {state: q4, read: Y, write: b, move: R, next: q4}
+    - {state: q4, read: B, write: B, move: L, next: q5}
+
+    - {state: q5, read: a, write: a, move: L, next: q5}
+    - {state: q5, read: b, write: b, move: L, next: q5}
+    - {state: q5, read: X, write: X, move: L, next: q5}
+    - {state: q5, read: Y, write: Y, move: L, next: q5}
+    - {state: q5, read: B, write: B, move: R, next: q6}
+
+    # --- Fase 3: tomar un simbolo de la primera mitad al cache ------------
+    - {state: q6, read: Z, write: Z, move: R, next: q6}
+    - {state: q6, read: X, write: [a, Z], move: R, next: q7}
+    - {state: q6, read: Y, write: [b, Z], move: R, next: q7}
+    # todo tachado: las dos mitades coinciden
+    - {state: q6, read: B, write: B, move: S, next: qf}
+
+    # --- llevar el cache hasta la segunda mitad ---------------------------
+    - {state: q7, read: [X, a], write: [a, X], move: R, next: q7}
+    - {state: q7, read: [Y, a], write: [a, Y], move: R, next: q7}
+    - {state: q7, read: [Z, a], write: [a, Z], move: R, next: q7}
+    - {state: q7, read: [X, b], write: [b, X], move: R, next: q7}
+    - {state: q7, read: [Y, b], write: [b, Y], move: R, next: q7}
+    - {state: q7, read: [Z, b], write: [b, Z], move: R, next: q7}
+    # coincide: tachar y vaciar el cache (si no coincide no hay regla)
+    - {state: q7, read: [a, a], write: [B, Z], move: L, next: q8}
+    - {state: q7, read: [b, b], write: [B, Z], move: L, next: q8}
+
+    # --- regresar al inicio -----------------------------------------------
+    - {state: q8, read: a, write: a, move: L, next: q8}
+    - {state: q8, read: b, write: b, move: L, next: q8}
+    - {state: q8, read: X, write: X, move: L, next: q8}
+    - {state: q8, read: Y, write: Y, move: L, next: q8}
+    - {state: q8, read: Z, write: Z, move: L, next: q8}
+    - {state: q8, read: B, write: B, move: R, next: q6}
+
+  inputs:
+    # aceptadas
+    - "abaaba"        # w = aba
+    - "babbbabb"      # w = babb
+    - "aabbaabb"      # w = aabb
+    # rechazadas
+    - "abaab"         # longitud impar
+    - "aabbab"        # aab ≠ bab
+    - "ababbaba"      # abab ≠ baba

@@ -1,0 +1,25 @@
+# El ejemplo exacto del enunciado, sin cambios. Solo define las dos primeras
+# reglas (guardar el primer simbolo en el cache), asi que toda cadena termina
+# rechazada en q1. Sirve para comprobar que el formato se lee igual que en el
+# PDF:  δ([q0, B], a) = ([q1, a], B, R)
+mt:
+  states: [q0, q1, q2, qf]
+  input_alphabet: [a, b]
+  tape_alphabet: [a, b, B, X, Y]
+  initial_state: q0
+  accept_states: [qf]
+  transitions:
+    - state: q0
+      read: [a, B]
+      write: [a, B]
+      move: R
+      next: q1
+    - state: q0
+      read: [b, B]
+      write: [b, B]
+      move: R
+      next: q1
+  inputs:
+    - "aabb"
+    - "ab"
+    - "aaabbb"

@@ -1,0 +1,46 @@
+# MT reconocedora (extra):  palindromos sobre {a, b}
+#
+# Ejemplo clasico del uso del cache: q0 guarda el primer simbolo en el cache y
+# lo borra, q1 corre al final llevandolo, q2 lo compara con el ultimo simbolo
+# y lo borra, q3 regresa. Acepta cuando ya no queda nada o queda un solo
+# simbolo en medio.
+
+mt:
+  name: "Palindromos"
+  description: >
+    Acepta las cadenas que se leen igual al derecho y al reves. Guarda el
+    primer simbolo en el cache, lo compara con el ultimo y borra ambos.
+
+  states: [q0, q1, q2, q3, qf]
+  input_alphabet: [a, b]
+  tape_alphabet: [a, b, B]
+  initial_state: q0
+  accept_states: [qf]
+
+  transitions:
+    - {state: q0, read: a, write: [a, B], move: R, next: q1}
+    - {state: q0, read: b, write: [b, B], move: R, next: q1}
+    - {state: q0, read: B, write: B,      move: S, next: qf}
+
+    - {state: q1, read: [a, a], write: [a, a], move: R, next: q1}
+    - {state: q1, read: [b, a], write: [a, b], move: R, next: q1}
+    - {state: q1, read: [B, a], write: [a, B], move: L, next: q2}
+    - {state: q1, read: [a, b], write: [b, a], move: R, next: q1}
+    - {state: q1, read: [b, b], write: [b, b], move: R, next: q1}
+    - {state: q1, read: [B, b], write: [b, B], move: L, next: q2}
+
+    - {state: q2, read: [a, a], write: [B, B], move: L, next: q3}
+    - {state: q2, read: [b, b], write: [B, B], move: L, next: q3}
+    # el simbolo del centro ya se habia borrado: longitud impar
+    - {state: q2, read: [B, a], write: [B, B], move: S, next: qf}
+    - {state: q2, read: [B, b], write: [B, B], move: S, next: qf}
+
+    - {state: q3, read: a, write: a, move: L, next: q3}
+    - {state: q3, read: b, write: b, move: L, next: q3}
+    - {state: q3, read: B, write: B, move: R, next: q0}
+
+  inputs:
+    - "abbba"
+    - "abaaba"
+    - "ababb"
+    - "aabab"

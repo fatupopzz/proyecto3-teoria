@@ -1,0 +1,142 @@
+# MT alteradora:  x+y  ->  x + y en binario
+#
+# Recibe dos numeros binarios separados por '+' y deja en la cinta solo su
+# suma (101+11 -> 1000). Suma columna por columna como a mano, de derecha a
+# izquierda y con acarreo:
+#
+#   * El acarreo vive en el NOMBRE del estado: la familia *0 trabaja con
+#     acarreo 0 y la familia *1 con acarreo 1.
+#   * El bit de y que se esta sumando viaja en el CACHE del estado.
+#
+# Una vuelta:
+#   f  - ir al final de la cinta
+#   t  - tomar el ultimo bit de y: guardarlo en el cache y borrarlo
+#   m  - cruzar lo que queda de y hasta el '+'
+#   s  - cruzar los bits ya sumados de x (o = 0, i = 1) hasta el primer bit
+#        pendiente de x (un blanco cuenta como 0) y escribir el bit de la suma
+#        x + y + acarreo como marca o / i. El nuevo acarreo decide si sigue
+#        f0 o f1.
+# Cuando y se acaba (t lee '+') se borra el '+' y p propaga el acarreo que
+# quede sobre los bits pendientes de x. Al final c convierte las marcas o/i
+# en 0/1 y r deja la cabeza al inicio del resultado.
+#
+# Convencion del cache:  read = [simbolo en cinta, cache]
+#                        write = [nuevo cache, simbolo a escribir]
+
+mt:
+  name: "Alteradora  x+y"
+  description: >
+    Suma dos numeros binarios. Recorre y de derecha a izquierda llevando cada
+    bit en el cache del estado y el acarreo en la familia de estados (f0..p0 /
+    f1..p1). Deja en la cinta unicamente el resultado.
+
+  states: [f0, t0, m0, s0, p0, f1, t1, m1, s1, p1, v, c, r, qf]
+  input_alphabet: ["0", "1", "+"]
+  tape_alphabet: ["0", "1", "+", o, i, B]
+  initial_state: f0
+  accept_states: [qf]
+
+  transitions:
+    # ===== acarreo 0 ======================================================
+    # f0: ir al final
+    - {state: f0, read: "0", write: "0", move: R, next: f0}
+    - {state: f0, read: "1", write: "1", move: R, next: f0}
+    - {state: f0, read: "+", write: "+", move: R, next: f0}
+    - {state: f0, read: o,   write: o,   move: R, next: f0}
+    - {state: f0, read: i,   write: i,   move: R, next: f0}
+    - {state: f0, read: B,   write: B,   move: L, next: t0}
+
+    # t0: el ultimo bit de y se va al cache; si solo queda '+', y se acabo
+    - {state: t0, read: "0", write: ["0", B], move: L, next: m0}
+    - {state: t0, read: "1", write: ["1", B], move: L, next: m0}
+    - {state: t0, read: "+", write: B,        move: L, next: p0}
+
+    # m0: cruzar y con el bit en el cache
+    - {state: m0, read: ["0", "0"], write: ["0", "0"], move: L, next: m0}
+    - {state: m0, read: ["1", "0"], write: ["0", "1"], move: L, next: m0}
+    - {state: m0, read: ["+", "0"], write: ["0", "+"], move: L, next: s0}
+    - {state: m0, read: ["0", "1"], write: ["1", "0"], move: L, next: m0}
+    - {state: m0, read: ["1", "1"], write: ["1", "1"], move: L, next: m0}
+    - {state: m0, read: ["+", "1"], write: ["1", "+"], move: L, next: s0}
+
+    # s0: cruzar lo ya sumado de x y sumar   bit_x + cache + 0
+    - {state: s0, read: [o, "0"], write: ["0", o], move: L, next: s0}
+    - {state: s0, read: [i, "0"], write: ["0", i], move: L, next: s0}
+    - {state: s0, read: [o, "1"], write: ["1", o], move: L, next: s0}
+    - {state: s0, read: [i, "1"], write: ["1", i], move: L, next: s0}
+    - {state: s0, read: ["0", "0"], write: [B, o], move: R, next: f0}   # 0+0+0 = 0
+    - {state: s0, read: ["0", "1"], write: [B, i], move: R, next: f0}   # 0+1+0 = 1
+    - {state: s0, read: ["1", "0"], write: [B, i], move: R, next: f0}   # 1+0+0 = 1
+    - {state: s0, read: ["1", "1"], write: [B, o], move: R, next: f1}   # 1+1+0 = 10
+    - {state: s0, read: [B, "0"],   write: [B, o], move: R, next: f0}   # x ya no tiene bits
+    - {state: s0, read: [B, "1"],   write: [B, i], move: R, next: f0}
+
+    # p0: y se acabo sin acarreo, x queda igual
+    - {state: p0, read: o,   write: o,   move: L, next: p0}
+    - {state: p0, read: i,   write: i,   move: L, next: p0}
+    - {state: p0, read: "0", write: "0", move: L, next: v}
+    - {state: p0, read: "1", write: "1", move: L, next: v}
+    - {state: p0, read: B,   write: B,   move: R, next: c}
+
+    # ===== acarreo 1 ======================================================
+    - {state: f1, read: "0", write: "0", move: R, next: f1}
+    - {state: f1, read: "1", write: "1", move: R, next: f1}
+    - {state: f1, read: "+", write: "+", move: R, next: f1}
+    - {state: f1, read: o,   write: o,   move: R, next: f1}
+    - {state: f1, read: i,   write: i,   move: R, next: f1}
+    - {state: f1, read: B,   write: B,   move: L, next: t1}
+
+    - {state: t1, read: "0", write: ["0", B], move: L, next: m1}
+    - {state: t1, read: "1", write: ["1", B], move: L, next: m1}
+    - {state: t1, read: "+", write: B,        move: L, next: p1}
+
+    - {state: m1, read: ["0", "0"], write: ["0", "0"], move: L, next: m1}
+    - {state: m1, read: ["1", "0"], write: ["0", "1"], move: L, next: m1}
+    - {state: m1, read: ["+", "0"], write: ["0", "+"], move: L, next: s1}
+    - {state: m1, read: ["0", "1"], write: ["1", "0"], move: L, next: m1}
+    - {state: m1, read: ["1", "1"], write: ["1", "1"], move: L, next: m1}
+    - {state: m1, read: ["+", "1"], write: ["1", "+"], move: L, next: s1}
+
+    # s1: bit_x + cache + 1
+    - {state: s1, read: [o, "0"], write: ["0", o], move: L, next: s1}
+    - {state: s1, read: [i, "0"], write: ["0", i], move: L, next: s1}
+    - {state: s1, read: [o, "1"], write: ["1", o], move: L, next: s1}
+    - {state: s1, read: [i, "1"], write: ["1", i], move: L, next: s1}
+    - {state: s1, read: ["0", "0"], write: [B, i], move: R, next: f0}   # 0+0+1 = 1
+    - {state: s1, read: ["0", "1"], write: [B, o], move: R, next: f1}   # 0+1+1 = 10
+    - {state: s1, read: ["1", "0"], write: [B, o], move: R, next: f1}   # 1+0+1 = 10
+    - {state: s1, read: ["1", "1"], write: [B, i], move: R, next: f1}   # 1+1+1 = 11
+    - {state: s1, read: [B, "0"],   write: [B, i], move: R, next: f0}
+    - {state: s1, read: [B, "1"],   write: [B, o], move: R, next: f1}
+
+    # p1: y se acabo con acarreo pendiente, propagarlo sobre x
+    - {state: p1, read: o,   write: o,   move: L, next: p1}
+    - {state: p1, read: i,   write: i,   move: L, next: p1}
+    - {state: p1, read: "0", write: "1", move: L, next: v}
+    - {state: p1, read: "1", write: "0", move: L, next: p1}
+    - {state: p1, read: B,   write: "1", move: L, next: v}
+
+    # ===== limpieza =======================================================
+    # v: volver al inicio
+    - {state: v, read: "0", write: "0", move: L, next: v}
+    - {state: v, read: "1", write: "1", move: L, next: v}
+    - {state: v, read: B,   write: B,   move: R, next: c}
+
+    # c: marcas o/i -> 0/1
+    - {state: c, read: o,   write: "0", move: R, next: c}
+    - {state: c, read: i,   write: "1", move: R, next: c}
+    - {state: c, read: "0", write: "0", move: R, next: c}
+    - {state: c, read: "1", write: "1", move: R, next: c}
+    - {state: c, read: B,   write: B,   move: L, next: r}
+
+    # r: dejar la cabeza sobre el primer bit del resultado
+    - {state: r, read: "0", write: "0", move: L, next: r}
+    - {state: r, read: "1", write: "1", move: L, next: r}
+    - {state: r, read: B,   write: B,   move: R, next: qf}
+
+  inputs:
+    - "101+11"        #  5 +  3 =  8   -> 1000
+    - "1111+1"        # 15 +  1 = 16   -> 10000
+    - "110+101"       #  6 +  5 = 11   -> 1011
+    - "1101+1011"     # 13 + 11 = 24   -> 11000
+    - "10011+110"     # 19 +  6 = 25   -> 11001
