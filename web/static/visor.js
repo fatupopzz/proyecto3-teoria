@@ -343,8 +343,11 @@ const R = 25;          // radio de los nodos
 const COL = 170;       // separacion entre capas
 const FIL = 150;       // separacion dentro de una capa
 
+// en telefono las capas van de arriba hacia abajo (mismo corte que el CSS)
+const vertical = () => matchMedia("(max-width: 560px)").matches;
+
 function firma(m) {
-  return "mt.pos." + (m.nombre || "") + "|" + m.estados.join(",");
+  return "mt.pos." + (vertical() ? "v|" : "") + (m.nombre || "") + "|" + m.estados.join(",");
 }
 
 /* Capas por BFS desde el estado inicial y luego unas pasadas de baricentro
@@ -389,8 +392,10 @@ function acomodar(m) {
   }
 
   const pos = {};
+  const enColumna = vertical();
   filas.forEach((c, i) => c.forEach((q, k) => {
-    pos[q] = { x: i * COL, y: (k - (c.length - 1) / 2) * FIL };
+    const a = i * COL, b = (k - (c.length - 1) / 2) * FIL;
+    pos[q] = enColumna ? { x: b * 1.25, y: a * .8 } : { x: a, y: b };
   }));
   return { pos, capa };
 }
@@ -401,6 +406,7 @@ function construirGrafo() {
   S.capas = auto.capa;
   const guardadas = leer(firma(m));
   S.pos = guardadas && m.estados.every((q) => guardadas[q]) ? guardadas : auto.pos;
+  S.vertical = vertical();
   dibujarGrafo();
 }
 
@@ -1126,6 +1132,7 @@ window.addEventListener("resize", () => {
     construirCinta();
     S.pasoPintado = null;
     if (S.cinta) pintarCinta(actual().ids[S.paso], null);
+    if (S.maquina && vertical() !== S.vertical) { construirGrafo(); resaltarGrafo(); }
   }, 120);
 });
 

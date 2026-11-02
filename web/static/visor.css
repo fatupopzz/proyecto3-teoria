@@ -134,22 +134,24 @@ button { cursor: pointer; }
 .aparato {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
-  height: 100vh;
-  min-height: 760px;
+  /* una pantalla; si la ventana es baja, la pagina crece en vez de encimar paneles */
+  height: max(100vh, 880px);
 }
 
 /* ---------- cabecera ---------------------------------------------------- */
 
+/* titulo y herramientas arriba; las fichas en su propia fila para que
+   siempre se vean todas las maquinas */
 .cabecera {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
-  gap: 8px 28px;
+  gap: 4px 28px;
   padding: 14px var(--margen) 0;
   border-bottom: 3px double var(--tinta);
 }
 
-.titulo { display: flex; align-items: center; gap: 16px; padding-bottom: 10px; }
+.titulo { display: flex; align-items: center; gap: 16px; padding-bottom: 4px; min-width: 0; }
 
 h1 {
   text-shadow: var(--brillo);
@@ -168,7 +170,7 @@ h1 {
   padding-left: 12px;
 }
 
-.fichas { display: flex; align-items: flex-end; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: none; padding-top: 6px; }
+.fichas { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px; min-width: 0; padding-top: 2px; }
 
 .ficha {
   position: relative;
@@ -194,10 +196,11 @@ h1 {
 }
 
 .herramientas {
+  grid-column: 2;
+  grid-row: 1;
   align-self: center;
   display: flex;
   gap: 8px;
-  padding-bottom: 8px;
 }
 .tema {
   padding: 8px 14px;
@@ -223,7 +226,8 @@ h1 {
 .sala {
   display: grid;
   grid-template-columns: 232px minmax(0, 1.3fr) minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
+  /* en pantallas bajas la pagina se desplaza antes que aplastar diagrama e IDs */
+  grid-template-rows: auto minmax(300px, 1fr);
   gap: 14px;
   /* a la derecha queda el hueco de la lengueta del expediente */
   padding: 14px calc(var(--margen) + 30px) 16px var(--margen);
@@ -235,6 +239,7 @@ h1 {
 .impresion { grid-column: 3; }
 
 .camara {
+  container-type: inline-size;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -275,14 +280,27 @@ h1 {
   background: var(--senal-fondo);
   color: var(--sobre-senal);
   font: 700 var(--t-xs)/1 var(--mono);
+  white-space: nowrap;
 }
 .rotulo h2 {
   text-shadow: var(--brillo);
   margin: 0;
+  min-width: 0;
   font: 700 var(--t-xl)/1 var(--rotulo);
   text-transform: uppercase;
   letter-spacing: .03em;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rotulo > .cam, .rotulo > .sec, .rotulo > .acciones, .hud-cam { flex-shrink: 0; }
+/* cada camara decide segun su propio ancho: el codigo de tiempo no cabe en
+   una camara angosta, asi que se oculta antes que salirse del marco */
+@container (max-width: 560px) {
+  .hud-cam .tc { display: none; }
+}
+@container (max-width: 760px) {
+  .cam-cinta .hud-cam #cam-sujeto { display: none; }
 }
 .maquina-desc {
   margin: 0;
@@ -696,6 +714,7 @@ input[type=range]::-moz-range-thumb {
   border: 1px solid var(--tinta);
   background: var(--papel-claro);
   font: 600 var(--t-s) var(--cuerpo);
+  white-space: nowrap;
 }
 .diagrama .acciones button:hover { background: var(--senal-suave); }
 .diagrama:fullscreen {
@@ -948,13 +967,12 @@ body.soltando::after {
 
 /* ---------- pantallas angostas -------------------------------------------- */
 
-@media (max-width: 1560px) {
+@media (max-width: 1240px) {
   .nota { display: none; }
+  .hud-cam #cam-sujeto { display: none; }
 }
 @media (max-width: 980px) {
   .aparato { height: auto; min-height: 0; }
-  .cabecera { grid-template-columns: 1fr auto; }
-  .fichas { grid-column: 1 / -1; grid-row: 2; }
   .sala { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; padding-right: calc(var(--margen) + 30px); }
   .riel, .cam-cinta, .diagrama, .impresion { grid-column: 1; grid-row: auto; }
   .entradas { flex-direction: row; overflow-x: auto; overflow-y: visible; }
@@ -969,22 +987,95 @@ body.soltando::after {
   .velocidad { grid-template-columns: 1fr auto; }
 }
 @media (max-width: 560px) {
-  :root { --celda: 46px; }
+  :root { --celda: 44px; --margen: 14px; }
+
+  /* franja: solo maquina y estado */
+  .franja { gap: 10px; }
+  .franja > span:nth-child(2), .franja > span:nth-child(3) { display: none; }
+  .franja .maquina-prueba { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+
+  .cabecera { grid-template-columns: minmax(0, 1fr) auto; padding-top: 10px; }
+  h1 { font-size: 26px; white-space: normal; }
+  .tema, .abrir { padding: 6px 9px; }
+  .herramientas { gap: 6px; }
+
+  /* todas las maquinas a la vista: dos columnas, sin desplazamiento lateral */
+  .fichas { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding-bottom: 0; }
+  .ficha { border-radius: 6px 12px 0 0; padding: 7px 10px; min-width: 0; }
+  .ficha .nom { font-size: var(--t-s); overflow: hidden; text-overflow: ellipsis; }
+
+  .sala { padding: 12px var(--margen) 14px; gap: 12px; }
+
+  /* sujetos: cuadricula de dos columnas, boletos compactos */
+  .entradas { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; overflow: visible; }
+  .entrada { padding: 7px 10px 7px 12px; column-gap: 10px; background-size: 100% 100%; }
+  .entrada { background:
+    linear-gradient(90deg, transparent 37px, color-mix(in srgb, var(--tinta) 35%, transparent) 37px 38px, transparent 38px) 0 0 / 100% 100%,
+    var(--papel-cinta); }
+  .entrada[aria-pressed="true"] { background:
+    linear-gradient(90deg, transparent 37px, color-mix(in srgb, var(--papel-claro) 35%, transparent) 37px 38px, transparent 38px) 0 0 / 100% 100%,
+    var(--tinta); }
+  .entrada .w { font-size: var(--t-m); overflow: hidden; text-overflow: ellipsis; }
+  .entrada .w::after { display: none; }
+  .entrada .marca { width: 20px; height: 20px; }
+  .entrada:hover { transform: none; }
+
+  .camara { padding: 8px 10px 10px; }
+  .cinta-marco { height: 150px; margin: 0 -10px; }
+  .cinta { top: 44px; height: 70px; }
   .celda { font-size: 24px; }
-  .estado-grande { font-size: 40px; }
-  .contador output { font-size: 36px; }
-  .sello { font-size: 28px; }
-  .cinta-marco { height: 160px; }
-  .cinta { top: 46px; height: 76px; }
-  .regla-posiciones { top: 128px; }
-  .carro { height: 116px; top: 18px; }
-  .tema, .abrir { padding: 6px 10px; }
-  .cabecera { grid-template-columns: minmax(0, 1fr); }
-  .herramientas { padding-bottom: 0; }
-  .fichas { grid-row: auto; }
-  h1 { font-size: 30px; white-space: normal; }
-  .propia button { flex: none; }
-  .hud-cam #cam-sujeto { display: none; }
+  .regla-posiciones { top: 120px; }
+  .carro { height: 108px; top: 18px; }
+  .sello { font-size: 26px; right: 8px; top: 18px; }
+  .sello small { max-width: 24ch; }
+  .maquina-desc { display: none; }
+
+  .tablero {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "estado . paso" "regla regla regla" "tiempo tiempo tiempo" "vel vel vel";
+    gap: 8px 12px;
+  }
+  .estado-grande { font-size: 38px; }
+  .contador output { font-size: 34px; }
+  .regla-actual output { font-size: var(--t-s); }
+
+  /* transporte fijo abajo, al alcance del pulgar */
+  .tablero .botones {
+    position: fixed;
+    z-index: 37;
+    left: 0; right: 0; bottom: 0;
+    padding: 8px var(--margen) calc(8px + env(safe-area-inset-bottom));
+    background: var(--papel);
+    border-top: 3px double var(--tinta);
+    box-shadow: 0 -10px 24px -16px color-mix(in srgb, var(--tinta) 60%, transparent);
+  }
+  .botones button { flex: 1 1 0; height: 48px; width: auto; }
+  .botones .play { flex: 1.5 1 0; width: auto; }
+
+  .rotulo h2 { font-size: var(--t-l); }
+  .diagrama svg { height: auto; min-height: 260px; max-height: 70vh; }
+  .leyenda { white-space: normal; }
+  .papel { height: 360px; }
+  .papel ol { padding: 0 24px; font-size: var(--t-s); background-size: 22px 26px, 22px 26px, auto; }
+  .papel ol { background-position: left top, right top, 0 0; }
+  .papel li { grid-template-columns: 3ch 1.2ch 1fr; gap: 4px; padding: 0 6px; }
+
+  /* el expediente: boton al final de la pagina y cajon a pantalla completa */
+  .lengueta {
+    position: static;
+    width: calc(100% - 2 * var(--margen));
+    margin: 0 var(--margen) 90px;
+    flex-direction: row;
+    justify-content: center;
+    writing-mode: horizontal-tb;
+    transform: none;
+    border: 1px solid var(--tinta);
+    border-radius: 0 0 10px 10px;
+    padding: 12px;
+  }
+  .lengueta:hover { padding-right: 12px; }
+  .expediente { width: 100vw; padding: 14px 16px 40px; }
+  .formal { grid-template-columns: 40px 1fr; }
 }
 
 /* ---------- protocolo de pruebas ------------------------------------------ */
@@ -1080,6 +1171,7 @@ body::after {
 }
 @media (max-width: 560px) {
   .franja .cinta-peligro { display: none; }
+  .camara::after { inset: -1px; }
 }
 
 .saltar {
