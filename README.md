@@ -16,7 +16,12 @@ Hay dos formas de usarlo:
   ACEPTADA o RECHAZADA cuando la MT se detiene.
 
 Toda la simulación corre en Python, en el paquete `mt`. El visor web solo reproduce
-las IDs que le devuelve el servidor.
+las IDs que recibe.
+
+**En línea:** <https://fatupopzz.github.io/proyecto3-teoria/>. En GitHub Pages no hay
+servidor, así que el visor carga [Pyodide](https://pyodide.org) (CPython compilado a
+WebAssembly) y ejecuta **los mismos archivos de `mt/`** dentro del navegador. La primera
+carga tarda unos segundos mientras descarga Python.
 
 ---
 
@@ -73,6 +78,17 @@ Abrir <http://127.0.0.1:5050>.
   acerca o aleja, el doble clic encuadra y **ampliar** lo pone en pantalla completa.
 - En **definición → yaml** se puede editar la máquina y cargar los cambios
   (`Ctrl/⌘ + Enter`). Los errores se marcan con su número de línea.
+
+### Versión estática (GitHub Pages)
+
+```bash
+python herramientas/construir_pages.py _site
+python -m http.server 8765 --directory _site
+```
+
+Arma en `_site/` la página, el paquete `mt/` y las máquinas, y la página usa Pyodide en
+lugar de Flask. El workflow `.github/workflows/pages.yml` corre las pruebas, construye
+el sitio y lo publica en cada push a `master`.
 
 ### Pruebas
 
@@ -244,13 +260,15 @@ longitud, con acarreo final que agrega un dígito y con ceros a la izquierda.
 proyecto3-teoria/
 ├── main.py                 CLI: lee el YAML, simula y muestra con rich
 ├── app.py                  servidor Flask del visor web
+├── herramientas/
+│   └── construir_pages.py  version estatica para GitHub Pages (Pyodide)
 ├── mt/
 │   ├── modelo.py           Transicion y MaquinaTuring (Q, Σ, Γ, δ, q0, B, F)
 │   ├── parser.py           YAML → MaquinaTuring, con validaciones y número de línea
 │   ├── cinta.py            cinta infinita en ambos sentidos
 │   ├── simulador.py        ciclo de ejecución, IDs y resultado
 │   ├── consola.py          salida en terminal (tablas, IDs, cinta, animación)
-│   └── exportar.py         MT y ejecuciones a JSON para el visor
+│   └── exportar.py         MT y ejecuciones a JSON; simular_texto() que usa el visor
 ├── web/
 │   ├── templates/index.html
 │   └── static/visor.css, visor.js
@@ -280,4 +298,5 @@ Decisiones de diseño:
   imprime la notación de Hopcroft, se anima en la terminal y se reproduce en el visor,
   incluso hacia atrás.
 - **La lógica no depende de la interfaz**: `mt` no sabe nada de rich ni de Flask. La
-  terminal y el visor consumen el mismo `Resultado`.
+  terminal y el visor consumen el mismo `Resultado`, y por eso el mismo paquete corre
+  sin cambios en el navegador con Pyodide para la versión de GitHub Pages.

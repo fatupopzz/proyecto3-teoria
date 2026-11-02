@@ -424,6 +424,18 @@ main { padding: 0 var(--margen); }
   background: color-mix(in srgb, var(--papel) 90%, transparent);
 }
 
+.aviso.cargando { color: var(--tinta-media); font-style: italic; }
+.aviso.cargando::after {
+  content: "";
+  display: block;
+  width: 180px;
+  height: 3px;
+  margin: 14px auto 0;
+  background: linear-gradient(90deg, var(--senal) 0 30%, transparent 30%) 0 0 / 200% 100%;
+  animation: avance 1s linear infinite;
+}
+@keyframes avance { to { background-position: -200% 0; } }
+
 /* el sello aparece cuando la MT se detiene */
 .sello {
   position: absolute;

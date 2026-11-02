@@ -67,6 +67,89 @@ const ultimoPaso = () => Math.max((actual()?.ids.length || 1) - 1, 0);
 const anchoCelda = () => parseFloat(getComputedStyle(E.cinta.firstChild || E.cinta).flexBasis) || 58;
 
 // ======================================================================
+// motor: el paquete mt de Python, en el servidor Flask o en el navegador
+// ======================================================================
+
+// Con `python app.py` se le pregunta al servidor. En GitHub Pages no hay
+// servidor: se carga Pyodide (CPython compilado a WebAssembly) y se ejecutan
+// los mismos archivos de mt/ dentro del navegador.
+const servidor = {
+  nombre: "servidor Flask",
+  maquinas: async () => (await fetch("api/maquinas")).json(),
+  yaml: async (archivo) => {
+    const r = await fetch("api/maquinas/" + encodeURIComponent(archivo));
+    return r.ok ? (await r.json()).yaml : null;
+  },
+  simular: async (yaml, entradas) => {
+    const r = await fetch("api/simular", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ yaml, entradas }),
+    });
+    return { ok: r.ok, datos: await r.json() };
+  },
+};
+
+const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.27.2/full/";
+const ARCHIVOS_MT = ["__init__.py", "modelo.py", "parser.py", "cinta.py", "simulador.py", "exportar.py"];
+let pyodide = null;
+
+function cargarScript(src) {
+  return new Promise((ok, mal) => {
+    const sc = document.createElement("script");
+    sc.src = src;
+    sc.onload = ok;
+    sc.onerror = () => mal(new Error("no se pudo descargar " + src));
+    document.head.append(sc);
+  });
+}
+
+function motorPython() {
+  pyodide ||= (async () => {
+    avisar("encendiendo Python en el navegador…");
+    await cargarScript(PYODIDE + "pyodide.js");
+    const py = await loadPyodide({ indexURL: PYODIDE });
+    await py.loadPackage("pyyaml");
+    py.FS.mkdirTree("/home/pyodide/mt");
+    const fuentes = await Promise.all(ARCHIVOS_MT.map((f) => fetch("mt/" + f).then((r) => r.text())));
+    ARCHIVOS_MT.forEach((f, k) => py.FS.writeFile("/home/pyodide/mt/" + f, fuentes[k]));
+    py.runPython(`
+import json, sys
+sys.path.insert(0, "/home/pyodide")
+from mt.exportar import simular_texto
+
+def simular_json(texto, entradas_json):
+    respuesta, ok = simular_texto(texto, json.loads(entradas_json))
+    return json.dumps({"ok": ok, "datos": respuesta})
+`);
+    avisar(null);
+    return py;
+  })();
+  return pyodide;
+}
+
+const navegador = {
+  nombre: "Python en el navegador (Pyodide)",
+  maquinas: async () => (await fetch("maquinas/indice.json")).json(),
+  yaml: async (archivo) => {
+    const r = await fetch("maquinas/" + encodeURIComponent(archivo));
+    return r.ok ? r.text() : null;
+  },
+  simular: async (yaml, entradas) => {
+    const py = await motorPython();
+    return JSON.parse(py.globals.get("simular_json")(yaml, JSON.stringify(entradas)));
+  },
+};
+
+const motor = window.MT_ESTATICO ? navegador : servidor;
+
+function avisar(texto) {
+  E.aviso.classList.toggle("cargando", !!texto);
+  E.aviso.hidden = !texto;
+  E.aviso.textContent = texto || "";
+}
+
+// ======================================================================
 // carga
 // ======================================================================
 
@@ -74,35 +157,29 @@ async function iniciar() {
   E.velocidad.value = leer("mt.vel") || 8;
   ajustarVelocidad(+E.velocidad.value);
 
-  S.maquinas = await (await fetch("/api/maquinas")).json();
+  S.maquinas = await motor.maquinas();
   const recordada = leer("mt.archivo");
   const inicial = S.maquinas.find((m) => m.archivo === recordada) || S.maquinas[0];
   if (inicial) await abrirMaquina(inicial.archivo);
 }
 
 async function abrirMaquina(archivo) {
-  const r = await fetch("/api/maquinas/" + encodeURIComponent(archivo));
-  if (!r.ok) return;
-  const d = await r.json();
+  const yaml = await motor.yaml(archivo);
+  if (yaml === null) return;
   S.archivo = archivo;
   guardar("mt.archivo", archivo);
-  ponerYaml(d.yaml);
+  ponerYaml(yaml);
   renderFichas();
-  await simular(d.yaml);
+  await simular(yaml);
 }
 
 async function simular(yaml, { entradas = null, agregar = false } = {}) {
   let d, ok;
   try {
-    const r = await fetch("/api/simular", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ yaml, entradas }),
-    });
-    ok = r.ok;
-    d = await r.json();
+    ({ ok, datos: d } = await motor.simular(yaml, entradas));
   } catch (e) {
-    mostrarError({ error: "no se pudo contactar al servidor: " + e.message });
+    avisar(null);
+    mostrarError({ error: `no se pudo simular con ${motor.nombre}: ${e.message}` });
     return false;
   }
   if (!ok) {
@@ -158,7 +235,8 @@ function renderFichas() {
     }, h("span", { class: "num" }, f.num), h("span", { class: "nom" }, f.nom),
        h("span", { class: "tipo" }, f.tipo)));
   }
-  E.pieArchivo.textContent = S.archivo ? "maquinas/" + S.archivo : (S.subido?.nombre || "");
+  E.pieArchivo.textContent = (S.archivo ? "maquinas/" + S.archivo : (S.subido?.nombre || ""))
+    + " · simulando con " + motor.nombre;
 }
 
 function renderEntradas() {

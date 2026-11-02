@@ -14,8 +14,8 @@ import os
 
 from flask import Flask, abort, jsonify, render_template, request
 
-from mt import ErrorConfiguracion, Simulador, cargar_archivo, cargar_texto
-from mt.exportar import maquina_a_dict, resultado_a_dict
+from mt import ErrorConfiguracion, cargar_archivo
+from mt.exportar import simular_texto
 
 RAIZ = os.path.dirname(os.path.abspath(__file__))
 CARPETA_MAQUINAS = os.path.join(RAIZ, "maquinas")
@@ -26,7 +26,7 @@ LIMITE_PASOS_WEB = 20_000
 app = Flask(__name__, template_folder="web/templates", static_folder="web/static")
 
 
-def _maquinas():
+def listar_maquinas():
     archivos = sorted(f for f in os.listdir(CARPETA_MAQUINAS) if f.endswith((".yaml", ".yml")))
     lista = []
     for archivo in archivos:
@@ -48,12 +48,12 @@ def inicio():
 
 @app.get("/api/maquinas")
 def maquinas():
-    return jsonify(_maquinas())
+    return jsonify(listar_maquinas())
 
 
 @app.get("/api/maquinas/<archivo>")
 def maquina(archivo):
-    if archivo not in {m["archivo"] for m in _maquinas()}:
+    if archivo not in {m["archivo"] for m in listar_maquinas()}:
         abort(404)
     with open(os.path.join(CARPETA_MAQUINAS, archivo), encoding="utf-8") as f:
         return jsonify({"archivo": archivo, "yaml": f.read()})
@@ -62,19 +62,8 @@ def maquina(archivo):
 @app.post("/api/simular")
 def simular():
     datos = request.get_json(silent=True) or {}
-    try:
-        m = cargar_texto(datos.get("yaml", ""))
-    except ErrorConfiguracion as e:
-        return jsonify({"error": e.mensaje, "linea": e.linea}), 400
-
-    entradas = datos.get("entradas")
-    if not isinstance(entradas, list):
-        entradas = m.entradas
-    simulador = Simulador(m, LIMITE_PASOS_WEB)
-    return jsonify({
-        "maquina": maquina_a_dict(m),
-        "resultados": [resultado_a_dict(simulador.ejecutar(str(e)), m) for e in entradas],
-    })
+    respuesta, ok = simular_texto(datos.get("yaml", ""), datos.get("entradas"), LIMITE_PASOS_WEB)
+    return jsonify(respuesta), 200 if ok else 400
 
 
 if __name__ == "__main__":

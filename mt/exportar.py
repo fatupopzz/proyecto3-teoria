@@ -1,4 +1,11 @@
-"""Conversion de la MT y sus ejecuciones a diccionarios (JSON para el visor web)."""
+"""Conversion de la MT y sus ejecuciones a diccionarios (JSON para el visor web).
+
+`simular_texto` es lo que responde el visor: lo llama el servidor Flask y, en
+GitHub Pages, el mismo codigo corriendo en el navegador con Pyodide.
+"""
+
+from .parser import ErrorConfiguracion, cargar_texto
+from .simulador import Simulador
 
 
 def transicion_a_dict(t):
@@ -44,3 +51,18 @@ def resultado_a_dict(r, maquina):
             "texto": d.texto(maquina.blanco, maquina.usa_cache),
         } for d in r.descripciones],
     }
+
+
+def simular_texto(texto, entradas=None, limite_pasos=20_000):
+    """YAML -> (respuesta, ok). Si entradas es None se usan las 'inputs' del YAML."""
+    try:
+        m = cargar_texto(texto)
+    except ErrorConfiguracion as e:
+        return {"error": e.mensaje, "linea": e.linea}, False
+    if not isinstance(entradas, list):
+        entradas = m.entradas
+    simulador = Simulador(m, limite_pasos)
+    return {
+        "maquina": maquina_a_dict(m),
+        "resultados": [resultado_a_dict(simulador.ejecutar(str(e)), m) for e in entradas],
+    }, True
