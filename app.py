@@ -26,15 +26,21 @@ LIMITE_PASOS_WEB = 20_000
 app = Flask(__name__, template_folder="web/templates", static_folder="web/static")
 
 
+def _titulo(archivo):
+    """ejemplo_enunciado.yaml -> Ejemplo enunciado (para las que no traen 'name')."""
+    base = os.path.splitext(archivo)[0].replace("_", " ")
+    return base[:1].upper() + base[1:]
+
+
 def listar_maquinas():
     archivos = sorted(f for f in os.listdir(CARPETA_MAQUINAS) if f.endswith((".yaml", ".yml")))
     lista = []
     for archivo in archivos:
         try:
             m = cargar_archivo(os.path.join(CARPETA_MAQUINAS, archivo))
-            nombre = m.nombre or archivo
+            nombre = m.nombre or _titulo(archivo)
         except ErrorConfiguracion:
-            nombre = archivo
+            nombre = _titulo(archivo)
         lista.append({"archivo": archivo, "nombre": nombre})
     # las dos del proyecto primero
     orden = {"reconocedora_ww.yaml": 0, "alteradora_suma_binaria.yaml": 1}

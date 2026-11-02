@@ -6,10 +6,10 @@
 # simbolo en medio.
 
 mt:
-  name: "Palindromos"
+  name: "Palíndromos"
   description: >
-    Acepta las cadenas que se leen igual al derecho y al reves. Guarda el
-    primer simbolo en el cache, lo compara con el ultimo y borra ambos.
+    Acepta las cadenas que se leen igual al derecho y al revés. Guarda el
+    primer símbolo en el cache, lo compara con el último y borra ambos.
 
   states: [q0, q1, q2, q3, qf]
   input_alphabet: [a, b]

@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Máquina de Turing</title>
+  <meta name="description" content="Simulador de Máquinas de Turing de una cinta: carga la máquina desde YAML, reproduce paso a paso las descripciones instantáneas y dice si la cadena es aceptada.">
+  <meta property="og:title" content="Máquina de Turing · simulador de una cinta">
+  <meta property="og:description" content="Cinta, diagrama de estados e IDs paso a paso. Teoría de la Computación, proyecto 3.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#1f1c17">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@700;900&display=swap">
@@ -14,6 +19,7 @@
   </script>
 </head>
 <body>
+  <a class="saltar" href="#t-cinta">saltar a la cinta</a>
   <div class="alarma" id="alarma" aria-hidden="true"></div>
   <div class="hud" aria-hidden="true">
     <span class="esquinas"></span>
@@ -37,16 +43,16 @@
   <div class="franja" role="note">
     <span class="cinta-peligro" aria-hidden="true"></span>
     <span>PROTOCOLO MT-03</span>
-    <span>·</span>
-    <span>PRUEBA DE COMPUTABILIDAD SOBRE UNA CINTA</span>
-    <span class="parpadeo" aria-hidden="true">● en curso</span>
+    <span aria-hidden="true">·</span>
+    <span class="maquina-prueba" id="franja-maquina">prueba de computabilidad sobre una cinta</span>
+    <span class="estado-prueba" id="franja-estado" role="status">○ en espera</span>
     <span class="cinta-peligro" aria-hidden="true"></span>
   </div>
 
   <header class="cabecera">
     <div class="titulo">
       <h1>Máquina<br>de Turing</h1>
-      <p class="nota">simulador de una cinta · expediente <span class="censura" title="clasificado">clasificado</span><br>teoría de la computación · proyecto 3</p>
+      <p class="nota">simulador de una cinta · expediente <span class="censura" id="censura" tabindex="0" title="pase el cursor para leer">clasificado</span><br>teoría de la computación · proyecto 3</p>
     </div>
     <nav class="fichas" id="fichas" aria-label="Máquinas"></nav>
     <div class="herramientas">
@@ -66,7 +72,7 @@
 
       <div class="fila-entradas">
         <span class="etq">sujetos de prueba</span>
-        <div class="entradas" id="entradas" role="tablist" aria-label="Cadenas"></div>
+        <div class="entradas" id="entradas" role="group" aria-label="Cadenas de prueba"></div>
         <form class="propia" id="propia">
           <input id="cadena" placeholder="otra cadena…" autocomplete="off" aria-label="Cadena a simular">
           <button type="submit">simular</button>
@@ -138,16 +144,16 @@
 
     <section class="archivo" aria-labelledby="t-def">
       <div class="rotulo"><span>§4</span><h2 id="t-def">definición</h2>
-        <div class="pestanas" role="tablist">
-          <button role="tab" data-panel="p-formal" aria-selected="true">M = (Q, Σ, Γ, δ, q₀, B, F)</button>
-          <button role="tab" data-panel="p-delta" aria-selected="false">tabla δ</button>
-          <button role="tab" data-panel="p-yaml" aria-selected="false">yaml</button>
+        <div class="pestanas" role="tablist" aria-label="Vista de la definición">
+          <button role="tab" id="tab-formal" aria-controls="p-formal" data-panel="p-formal" aria-selected="true">M = (Q, Σ, Γ, δ, q₀, B, F)</button>
+          <button role="tab" id="tab-delta" aria-controls="p-delta" data-panel="p-delta" aria-selected="false">tabla δ</button>
+          <button role="tab" id="tab-yaml" aria-controls="p-yaml" data-panel="p-yaml" aria-selected="false">yaml</button>
         </div>
       </div>
 
-      <div class="panel" id="p-formal"></div>
-      <div class="panel" id="p-delta" hidden></div>
-      <div class="panel" id="p-yaml" hidden>
+      <div class="panel" id="p-formal" role="tabpanel" aria-labelledby="tab-formal"></div>
+      <div class="panel" id="p-delta" role="tabpanel" aria-labelledby="tab-delta" hidden></div>
+      <div class="panel" id="p-yaml" role="tabpanel" aria-labelledby="tab-yaml" hidden>
         <div class="editor">
           <pre class="numeros" id="numeros" aria-hidden="true"></pre>
           <textarea id="yaml" spellcheck="false" aria-label="Descripción YAML de la máquina"></textarea>

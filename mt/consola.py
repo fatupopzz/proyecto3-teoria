@@ -209,7 +209,7 @@ def animar(resultado, maquina, pausa=0.12):
             cabecera.append("   cache ", style=TENUE)
             cabecera.append(d.cache, style=f"bold {CACHE}")
         regla = Text(d.transicion.formal(maquina.blanco, _con_cache(maquina))
-                     if d.transicion else "configuracion inicial", style=TENUE)
+                     if d.transicion else "configuración inicial", style=TENUE)
         partes = [cabecera, cinta_visual(simbolos, ventana_ini, d.cabeza, maquina.blanco),
                   Text(""), regla, Text(""), _id_coloreado(d, maquina)]
         if final:

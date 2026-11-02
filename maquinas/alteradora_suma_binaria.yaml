@@ -26,9 +26,9 @@
 mt:
   name: "Alteradora  x+y"
   description: >
-    Suma dos numeros binarios. Recorre y de derecha a izquierda llevando cada
+    Suma dos números binarios. Recorre y de derecha a izquierda llevando cada
     bit en el cache del estado y el acarreo en la familia de estados (f0..p0 /
-    f1..p1). Deja en la cinta unicamente el resultado.
+    f1..p1). Deja en la cinta únicamente el resultado.
 
   states: [f0, t0, m0, s0, p0, f1, t1, m1, s1, p1, v, c, r, qf]
   input_alphabet: ["0", "1", "+"]

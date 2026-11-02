@@ -87,6 +87,6 @@ class MaquinaTuring:
                     i += len(s)
                     break
             else:
-                raise ValueError(f"'{cadena[i]}' (posicion {i}) no pertenece a Σ = "
+                raise ValueError(f"'{cadena[i]}' (posición {i}) no pertenece a Σ = "
                                  f"{{{', '.join(self.alfabeto_entrada)}}}")
         return simbolos

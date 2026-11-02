@@ -26,7 +26,7 @@ mt:
   name: "Reconocedora  ww"
   description: >
     Acepta las cadenas de la forma ww con w en {a,b}+. Encuentra la mitad
-    marcando desde ambos extremos y luego compara simbolo por simbolo
+    marcando desde ambos extremos y luego compara símbolo por símbolo
     cargando cada letra en el cache del estado.
 
   states: [q0, q1, q2, q3, q4, q5, q6, q7, q8, qf]

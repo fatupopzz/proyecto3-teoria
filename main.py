@@ -61,7 +61,7 @@ def main():
         consola.print(f"[bold red]No existe el archivo {args.archivo}[/]")
         return 1
     except ErrorConfiguracion as e:
-        consola.print(f"[bold red]Configuracion invalida[/] en {args.archivo}, {e}")
+        consola.print(f"[bold red]Configuración inválida[/] en {args.archivo}, {e}")
         return 1
 
     mostrar_maquina(maquina, args.archivo)

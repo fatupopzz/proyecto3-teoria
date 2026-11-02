@@ -35,7 +35,7 @@ class ErrorConfiguracion(Exception):
 
     def __str__(self):
         if self.linea:
-            return f"linea {self.linea}: {self.mensaje}"
+            return f"línea {self.linea}: {self.mensaje}"
         return self.mensaje
 
 
@@ -94,7 +94,7 @@ def _lista(raiz, clave, obligatoria=True):
         valor = [valor]
     for v in valor:
         if not isinstance(v, str):
-            raise ErrorConfiguracion(f"'{clave}' solo puede contener simbolos o nombres",
+            raise ErrorConfiguracion(f"'{clave}' solo puede contener símbolos o nombres",
                                      raiz.get("__linea__"))
     return [v.strip() for v in valor]
 
@@ -127,13 +127,13 @@ def _construir(raiz):
     blanco = _texto(raiz, "blank", "B")
 
     if not estados:
-        raise ErrorConfiguracion("Q no puede ser vacio", linea_raiz)
+        raise ErrorConfiguracion("Q no puede ser vacío", linea_raiz)
     for nombre, valores in (("states", estados), ("input_alphabet", sigma),
                             ("tape_alphabet", gamma)):
         if rep := _repetidos(valores):
             raise ErrorConfiguracion(f"'{nombre}' repite {', '.join(rep)}", linea_raiz)
         if "" in valores:
-            raise ErrorConfiguracion(f"'{nombre}' tiene un elemento vacio", linea_raiz)
+            raise ErrorConfiguracion(f"'{nombre}' tiene un elemento vacío", linea_raiz)
 
     if blanco not in gamma:
         raise ErrorConfiguracion(f"el blanco '{blanco}' debe estar en Γ (tape_alphabet)",
@@ -145,9 +145,9 @@ def _construir(raiz):
         raise ErrorConfiguracion(f"Σ debe estar contenido en Γ; faltan en Γ: {', '.join(fuera)}",
                                  linea_raiz)
     if inicial not in estados:
-        raise ErrorConfiguracion(f"el estado inicial '{inicial}' no esta en Q", linea_raiz)
+        raise ErrorConfiguracion(f"el estado inicial '{inicial}' no está en Q", linea_raiz)
     if fuera := [q for q in aceptacion if q not in estados]:
-        raise ErrorConfiguracion(f"estados de aceptacion fuera de Q: {', '.join(fuera)}",
+        raise ErrorConfiguracion(f"estados de aceptación fuera de Q: {', '.join(fuera)}",
                                  linea_raiz)
 
     reglas = raiz.get("transitions")
@@ -162,7 +162,7 @@ def _construir(raiz):
         if (previa := transiciones.get(t.clave)) is not None:
             raise ErrorConfiguracion(
                 f"la MT no es determinista: δ([{t.estado}, {t.cache_lee}], {t.lee}) ya se "
-                f"definio en la linea {previa.linea}", t.linea)
+                f"definió en la línea {previa.linea}", t.linea)
         transiciones[t.clave] = t
 
     entradas = raiz.get("inputs", [])
@@ -190,29 +190,29 @@ def _par(regla, clave, linea):
     """Normaliza read/write a una pareja; un escalar deja el cache en blanco."""
     valor = regla.get(clave)
     if valor is None:
-        raise ErrorConfiguracion(f"la transicion no tiene '{clave}'", linea)
+        raise ErrorConfiguracion(f"la transición no tiene '{clave}'", linea)
     if isinstance(valor, str):
         return None, valor.strip()
     if isinstance(valor, list) and len(valor) == 2 and all(isinstance(v, str) for v in valor):
         return valor[0].strip(), valor[1].strip()
     if isinstance(valor, list) and len(valor) == 1 and isinstance(valor[0], str):
         return None, valor[0].strip()
-    raise ErrorConfiguracion(f"'{clave}' debe ser un simbolo o una lista de dos simbolos", linea)
+    raise ErrorConfiguracion(f"'{clave}' debe ser un símbolo o una lista de dos símbolos", linea)
 
 
 def _transicion(regla, estados, gamma, blanco):
     if not isinstance(regla, dict):
-        raise ErrorConfiguracion("cada transicion debe ser un mapeo con state, read, "
+        raise ErrorConfiguracion("cada transición debe ser un mapeo con state, read, "
                                  "write, move y next")
     linea = regla["__linea__"]
     for clave in ("state", "next", "move"):
         if not isinstance(regla.get(clave), str):
-            raise ErrorConfiguracion(f"la transicion no tiene '{clave}'", linea)
+            raise ErrorConfiguracion(f"la transición no tiene '{clave}'", linea)
 
     estado, siguiente = regla["state"].strip(), regla["next"].strip()
     for q in (estado, siguiente):
         if q not in estados:
-            raise ErrorConfiguracion(f"el estado '{q}' no esta en Q", linea)
+            raise ErrorConfiguracion(f"el estado '{q}' no está en Q", linea)
 
     # read = [simbolo leido, cache]   write = [nuevo cache, simbolo escrito]
     a, b = _par(regla, "read", linea)
@@ -227,7 +227,7 @@ def _transicion(regla, estados, gamma, blanco):
 
     mueve = _MOVIMIENTOS.get(regla["move"].strip().upper())
     if mueve not in MOVIMIENTOS:
-        raise ErrorConfiguracion(f"movimiento '{regla['move']}' invalido; use L, R o S", linea)
+        raise ErrorConfiguracion(f"movimiento '{regla['move']}' inválido; use L, R o S", linea)
 
     return Transicion(estado, lee, cache_lee, siguiente, escribe, cache_escribe,
                       mueve, linea)

@@ -89,7 +89,7 @@ class Simulador:
         while True:
             if mt.es_aceptacion(estado):
                 return Resultado(entrada, True, ACEPTADA,
-                                 f"la MT se detuvo en el estado de aceptacion {estado}",
+                                 f"la MT se detuvo en el estado de aceptación {estado}",
                                  ids, cinta.contenido())
 
             leido = cinta.leer()
@@ -97,8 +97,8 @@ class Simulador:
             if regla is None:
                 pareja = f"[{estado}, {cache}]" if mt.usa_cache else estado
                 return Resultado(entrada, False, SIN_TRANSICION,
-                                 f"δ({pareja}, {leido}) no esta definida y {estado} no es "
-                                 f"de aceptacion", ids, cinta.contenido())
+                                 f"δ({pareja}, {leido}) no está definida y {estado} no es "
+                                 f"de aceptación", ids, cinta.contenido())
 
             if len(ids) > self.limite_pasos:
                 return Resultado(entrada, False, LIMITE,

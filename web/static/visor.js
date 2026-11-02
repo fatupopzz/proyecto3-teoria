@@ -230,7 +230,7 @@ function renderFichas() {
   }
   for (const f of fichas) {
     E.fichas.append(h("button", {
-      class: "ficha", role: "tab", "aria-selected": String(f.activa),
+      class: "ficha", "aria-current": String(f.activa),
       onclick: () => { if (!f.activa) f.abrir(); },
     }, h("span", { class: "num" }, f.num), h("span", { class: "nom" }, f.nom),
        h("span", { class: "tipo" }, f.tipo)));
@@ -249,8 +249,8 @@ function renderEntradas() {
       ? "fuera de Σ"
       : `|w|=${[...r.entrada].length} · ${r.pasos} pasos`;
     E.entradas.append(h("button", {
-      class: "entrada" + (r.propia ? " propia-res" : ""), role: "tab",
-      "aria-selected": String(i === S.sel),
+      class: "entrada" + (r.propia ? " propia-res" : ""),
+      "aria-pressed": String(i === S.sel),
       onclick: () => seleccionar(i),
     }, marca, h("span", { class: "w", "data-sujeto": "sujeto " + String(i + 1).padStart(2, "0") }, r.entrada || "ε"),
        h("span", { class: "info" }, info)));
@@ -260,7 +260,7 @@ function renderEntradas() {
 function seleccionar(i) {
   pausar();
   S.sel = i;
-  [...E.entradas.children].forEach((b, k) => b.setAttribute("aria-selected", String(k === i)));
+  [...E.entradas.children].forEach((b, k) => b.setAttribute("aria-pressed", String(k === i)));
   construirCinta();
   construirIds();
   E.tiempo.max = ultimoPaso();
@@ -276,6 +276,9 @@ function seleccionar(i) {
 
 function renderMaquina() {
   const m = S.maquina;
+  $("#franja-maquina").textContent = (m.nombre || S.archivo || S.subido?.nombre || "máquina sin nombre").replace(/\s+/g, " ");
+  // lo tachado del expediente es el tipo de prueba; se lee pasando el cursor
+  $("#censura").textContent = S.archivo ? tipoDe(S.archivo) : "archivo propio";
   E.descripcion.textContent = m.descripcion || "";
   E.cacheCaja.hidden = !m.usaCache;
   renderFormal();
@@ -814,7 +817,34 @@ function irA(p) {
   if (p === fin) ponerSello(r, previo !== fin);
   else E.sello.hidden = true;
   marcarHud(r, p);
+  marcarEstado();
   S.pasoPintado = p;
+}
+
+// La franja de protocolo y el HUD dicen en que va la prueba de verdad. La franja
+// es role=status: solo se reescribe cuando cambia el estado, no en cada paso,
+// para no saturar al lector de pantalla.
+function estadoPrueba() {
+  const r = actual();
+  if (!r) return ["○ en espera", false];
+  if (!r.ids.length) return ["■ entrada inválida", false];
+  if (S.paso >= ultimoPaso()) {
+    if (r.aceptada) return ["■ sujeto aceptado", false];
+    if (r.motivo === "limite_pasos") return ["■ no se detuvo", false];
+    return ["■ sujeto rechazado", false];
+  }
+  if (S.reproduciendo) return ["● registrando", true];
+  return S.paso === 0 ? ["○ en espera", false] : ["❚❚ en pausa", false];
+}
+
+function marcarEstado() {
+  const [texto, vivo] = estadoPrueba();
+  const el = $("#franja-estado");
+  if (el.textContent !== texto) el.textContent = texto;
+  el.classList.toggle("vivo", vivo);
+  const rec = document.querySelector(".hud .rec");
+  rec.textContent = vivo ? "REC" : texto.replace(/^\S+\s/, "").toUpperCase();
+  rec.classList.toggle("quieto", !vivo);
 }
 
 // codigo de tiempo de la camara: cada paso de la MT es un cuadro a 24 cps
@@ -926,11 +956,13 @@ function reproducir() {
     S.raf = requestAnimationFrame(tic);
   };
   S.raf = requestAnimationFrame(tic);
+  marcarEstado();
 }
 
 function pausar() {
   S.reproduciendo = false;
   cancelAnimationFrame(S.raf);
+  if (actual()) marcarEstado();
   E.bPlay.textContent = "▶";
   E.bPlay.setAttribute("aria-label", "Reproducir");
 }

@@ -92,7 +92,7 @@ def test_cadena_vacia():
 
 
 @pytest.mark.parametrize("reglas, fragmento", [
-    ("    - {state: q0, read: a, write: X, move: R, next: q9}", "'q9' no esta en Q"),
+    ("    - {state: q0, read: a, write: X, move: R, next: q9}", "'q9' no está en Q"),
     ("    - {state: q0, read: z, write: X, move: R, next: q1}", "'z' en read no pertenece a Γ"),
     ("    - {state: q0, read: a, write: X, move: U, next: q1}", "movimiento 'U'"),
     ("    - {state: q0, read: [a, b, c], write: X, move: R, next: q1}", "lista de dos"),
@@ -111,7 +111,7 @@ def test_determinismo_reporta_ambas_lineas():
     with pytest.raises(ErrorConfiguracion) as e:
         mt("""    - {state: q0, read: a, write: X, move: R, next: q1}
     - {state: q0, read: a, write: Y, move: L, next: q1}""")
-    assert e.value.linea == 10 and "linea 9" in e.value.mensaje
+    assert e.value.linea == 10 and "línea 9" in e.value.mensaje
 
 
 @pytest.mark.parametrize("texto, fragmento", [
