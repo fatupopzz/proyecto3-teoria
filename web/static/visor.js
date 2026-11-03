@@ -893,6 +893,8 @@ function construirIds() {
   E.ids.replaceChildren();
   S.filasIds = [];
   if (!r) return;
+  // el CSS achica la letra para que la ID mas larga quepa sin cortarse
+  E.ids.style.setProperty("--largo", Math.max(0, ...r.ids.map((d) => [...d.texto].length)));
   const frag = document.createDocumentFragment();
   r.ids.forEach((d, k) => {
     const li = h("li", { onclick: () => { pausar(); irA(k); } },

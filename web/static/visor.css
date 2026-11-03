@@ -760,12 +760,22 @@ input[type=range]::-moz-range-thumb {
   border: 1px solid var(--tinta);
   scroll-behavior: smooth;
   box-shadow: 6px 6px 0 color-mix(in srgb, var(--tinta) 12%, transparent);
+  container-type: inline-size;
 }
+/* La ID mas larga de la ejecucion (--largo, lo pone visor.js) tiene que caber
+   completa: la letra se achica hasta 11px antes de cortar la cinta. --fijo es
+   lo que no es texto (perforaciones, rellenos, huecos, barra de desplazamiento)
+   y --cols las columnas del numero de paso y el ⊢; Courier Prime avanza 0.6em por caracter. */
 .papel ol {
+  --fijo: 132px;
+  --cols: 5.6;
   list-style: none;
   margin: 0;
   padding: 0 36px;
   font: 400 var(--t-m)/26px var(--mono);
+  font-size: clamp(11px, (100cqi - var(--fijo)) / (var(--largo, 16) + var(--cols)) / 0.6, var(--t-m));
+  width: max-content;
+  min-width: 100%;
   background:
     radial-gradient(circle at 15px 13px, var(--papel-oscuro) 4.5px, color-mix(in srgb, var(--tinta) 18%, transparent) 5px, transparent 5.6px) left top / 34px 26px repeat-y,
     radial-gradient(circle at 19px 13px, var(--papel-oscuro) 4.5px, color-mix(in srgb, var(--tinta) 18%, transparent) 5px, transparent 5.6px) right top / 34px 26px repeat-y,
@@ -796,6 +806,17 @@ input[type=range]::-moz-range-thumb {
 .papel li.actual .c { color: var(--ambar-inv); }
 .papel li.actual .n, .papel li.actual .t { color: var(--tenue-inv); }
 .papel li.fin { font-weight: 700; }
+/* papel angosto: perforaciones y margenes compactos para dejarle sitio a la ID */
+@container (max-width: 380px) {
+  .papel ol {
+    --fijo: 80px;
+    --cols: 4.2;
+    padding: 0 22px;
+    background-size: 22px 26px, 22px 26px, auto;
+    background-position: left top, right top, 0 0;
+  }
+  .papel li { grid-template-columns: 3ch 1.2ch 1fr; gap: 4px; padding: 0 4px; }
+}
 
 /* ---------- definicion ---------------------------------------------------- */
 
@@ -1056,9 +1077,6 @@ body.soltando::after {
   .diagrama svg { height: auto; min-height: 260px; max-height: 70vh; }
   .leyenda { white-space: normal; }
   .papel { height: 360px; }
-  .papel ol { padding: 0 24px; font-size: var(--t-s); background-size: 22px 26px, 22px 26px, auto; }
-  .papel ol { background-position: left top, right top, 0 0; }
-  .papel li { grid-template-columns: 3ch 1.2ch 1fr; gap: 4px; padding: 0 6px; }
 
   /* el expediente: boton al final de la pagina y cajon a pantalla completa */
   .lengueta {
