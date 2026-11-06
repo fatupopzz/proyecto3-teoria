@@ -2,6 +2,8 @@
 
 Teoría de la Computación, noviembre 2025.
 
+**Integrantes:** Juan José Rivas, Daniel Sandoval y Fátima Navarro.
+
 Simulador de Máquinas de Turing de **una cinta**. Lee la descripción formal de la MT desde
 un archivo YAML, simula cada cadena configurada, muestra la lista completa de
 **descripciones instantáneas (IDs)** e indica si la cadena fue **aceptada** o **rechazada**
