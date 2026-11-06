@@ -23,6 +23,8 @@ servidor, así que el visor carga [Pyodide](https://pyodide.org) (CPython compil
 WebAssembly) y ejecuta **los mismos archivos de `mt/`** dentro del navegador. La primera
 carga tarda unos segundos mientras descarga Python.
 
+**Video:** <https://youtu.be/kTzLNvqlVE4>
+
 ---
 
 ## Instalación
